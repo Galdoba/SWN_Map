@@ -4,21 +4,6 @@ import (
 	"strconv"
 )
 
-func main0() {
-	gr := NewGrid(6, 7)
-	for y := 0; y < gr.maxY; y++ {
-		for x := 0; x < gr.maxX; x++ {
-			tl := NewTile(1+x, 1+y)
-			id := idForGrid(*gr, x, y)
-
-			gr.tileMap[id] = tl
-		}
-	}
-	gr.tileMap[5].content[4] = "|Test Info |"
-	gr.tileMap[14].content[3] = "|   test2  |"
-	drawGrid(*gr)
-}
-
 type grid struct {
 	tileMap  map[int]*tile
 	maxX     int
@@ -67,7 +52,7 @@ func drawGrid(gr grid) string {
 		rowNum := lineNum / gr.tileSize
 		prefix := ""
 		if rowNum%2 > 0 {
-			prefix = "      "
+			prefix = "        " //Offset For Drawing
 		}
 		line = line + prefix
 		for i := 0; i < gr.maxX; i++ {
@@ -99,12 +84,14 @@ func Square(x, y int) []string {
 	yCoord := convertCoord(y)
 
 	sqr := []string{
-		"+----------+",
-		"|          |",
-		"|  " + xCoord + yCoord + "  |",
-		"|          |",
-		"|          |",
-		"+----------+",
+		"+--------------+",
+		"|X" + xCoord + " Y" + yCoord + " Z" + yCoord + "|",
+		"|              |",
+		"|              |",
+		"|              |",
+		"|              |",
+		"|              |",
+		"+--------------+",
 	}
 	return sqr
 }
@@ -122,18 +109,19 @@ func convertCoord(i int) string {
 	if neg {
 		coord = "-" + coord
 	} else {
-		coord = " " + coord
+		coord = "+" + coord
 	}
 	return coord
 }
 
 /*
-  +----------+
-  |      ||  |
-  |1234567890|
-  |          |+----------+
-  |          ||ABCDEFGHIJ|
-  +----------+|1234567890|
+  +-------------+
+  |         ||  |
+  |1234567890123|
+  |             |+----------+
+  |             |
+  |             ||ABCDEFGHIJ|
+  +-------------+|1234567890|
   +----------+|          |
   |          ||          |
   |          |+----------+

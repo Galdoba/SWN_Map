@@ -43,8 +43,6 @@ func main() {
 			gr.tileMap[id] = tl
 		}
 	}
-	gr.tileMap[5].content[4] = "|Test Info |"
-	gr.tileMap[14].content[3] = "|   test2  |"
 	grid0 = gr
 
 	//Tile("06","02")
@@ -82,11 +80,11 @@ func tileByID(id int) *tile {
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 
-	v1, v1Err := newPanelInfo(g, "Size", 0, 0, maxX/2, maxY-3)
+	v1, v1Err := newPanelInfo(g, "Size", 0, 0, maxX/4, maxY-3)
 	if v1Err != nil && v1Err != gocui.ErrUnknownView {
 		return v1Err
 	}
-	v2, err := newPanelInfo(g, "Info", maxX/2+1, 0, maxX/2-2, maxY-maxY/2)
+	v2, err := newPanelInfo(g, "Info", maxX/4+1, 0, (maxX/4)*3-2, maxY-maxY/4)
 	if err != nil && err != gocui.ErrUnknownView {
 		return err
 	}
@@ -156,22 +154,20 @@ func mapCoordinates(mapCellX, mapCellY int) (mapXCoords int, mapYCoords int) {
 	mapYCoords = (0 + mapCellY) / 6
 	offset := mapYCoords % 2
 	if offset == 1 {
-		offset = -6
+		offset = 6
 	}
-	mapXCoords = ((mapCellX + offset - 6) / 12)
+	mapXCoords = ((mapCellX + offset - 4) / 16)
 	return mapXCoords, mapYCoords
 }
 
 /*
 
-0000000       2222222
-0     0       2222222
-0     0-------2222222
-0000000-     -2222222
-+++++++-     -3333333
-+     +-------3333333
-+     +44444443333333
-+++++++44444443333333
-	   4444444
-	   4444444
++--------------+
+|X-00 Y+00 Z-00|
+|        Nebula|
+|Star:  G2134a3|
+|*P  *St    *Mf|
+|      Ansa Tau|
+|player is here|
++--------------+
 */
