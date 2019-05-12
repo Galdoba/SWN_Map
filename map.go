@@ -5,7 +5,9 @@ import (
 )
 
 type grid struct {
-	tileMap  map[int]*tile
+	tileMap  map[int]*Tile
+	minX     int
+	minY     int
 	maxX     int
 	maxY     int
 	tileSize int
@@ -16,14 +18,16 @@ type screenCoords struct {
 	yCoord int
 }
 
-type tile struct {
+type Tile struct {
 	sc      screenCoords
 	content []string
 }
 
-func NewGrid(maxX, maxY int) *grid {
+func NewGrid(minX, minY, maxX, maxY int) *grid {
 	gr := grid{}
-	gr.tileMap = make(map[int]*tile)
+	gr.tileMap = make(map[int]*Tile)
+	gr.minX = minX
+	gr.minY = minY
 	gr.maxX = maxX
 	gr.maxY = maxY
 	gr.tileMap[0] = NewTile(0, 0)
@@ -31,7 +35,7 @@ func NewGrid(maxX, maxY int) *grid {
 	return &gr
 }
 
-func getScreenCoords(t tile) screenCoords {
+func getScreenCoords(t Tile) screenCoords {
 	return t.sc
 }
 
@@ -67,8 +71,8 @@ func drawGrid(gr grid) string {
 	return gridStr
 }
 
-func NewTile(x, y int) *tile {
-	t := tile{}
+func NewTile(x, y int) *Tile {
+	t := Tile{}
 	t.sc.xCoord = x
 	t.sc.yCoord = y
 	t.content = Square(x, y)

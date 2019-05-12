@@ -34,10 +34,15 @@ func main() {
 
 	bindKeys(g)
 
-	gr := NewGrid(9, 7)
-	for y := 0; y < gr.maxY; y++ {
-		for x := 0; x < gr.maxX; x++ {
-			tl := NewTile(1+x, 1+y)
+	tile1 := newTileHex(-1, -1)
+	tile2 := newTileHex(3, 2)
+
+	minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex)
+
+	gr := NewGrid(minX, minY, maxX, maxY)
+	for y := minY; y < gr.maxY; y++ {
+		for x := minX; x < gr.maxX; x++ {
+			tl := NewTile(x, y)
 			id := idForGrid(*gr, x, y)
 
 			gr.tileMap[id] = tl
@@ -50,7 +55,8 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(500 * time.Millisecond)
-			g.Update(layout)
+			g.Execute(layout)
+
 			if tickerGo {
 				ticker = ticker + counter
 			}
@@ -69,7 +75,7 @@ func tileStrings(x, y int) []string {
 	return sqr
 }
 
-func tileByID(id int) *tile {
+func tileByID(id int) *Tile {
 	return grid0.tileMap[id]
 }
 
@@ -115,8 +121,10 @@ func fillPanel(v *gocui.View) {
 		ts := runStart.Format("2006-Jan-02 15:04:05")
 		fmt.Fprintf(v, "Current Real Time: %s \n", t)
 		fmt.Fprintf(v, "RunStart: %s\n", ts)
-		s := time.Since(runStart).Round(time.Millisecond)
-		pureSeconds := float64(s/time.Millisecond) + 567
+		//s := time.Since(runStart).Round(time.Millisecond)
+		s := 567.2
+		pureSeconds := float64(time.Millisecond) + 567
+
 		fmt.Fprintf(v, "Program working: %s\n Sec: %d\n", s, pureSeconds/1000)
 		fmt.Fprintf(v, "%d, %d\n", ticker, counter)
 		fmt.Fprintf(v, "rume 'm' = %d", string(rune(109)))
