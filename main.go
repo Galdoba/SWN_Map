@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/jroimartin/gocui"
@@ -22,6 +21,7 @@ var mapCellXLast int
 var mapCellYLast int
 
 func main() {
+	initGrids()
 	runStart = time.Now()
 	counter = 1
 	g, err := gocui.NewGui(gocui.OutputNormal)
@@ -34,20 +34,14 @@ func main() {
 
 	bindKeys(g)
 
-	tile1 := newTileHex(-1, -1)
-	tile2 := newTileHex(3, 2)
+	tile1 := newTileHex(-1, -3)
+	tile2 := newTileHex(-2, -1)
+	tile3 := newTileHex(1, 1)
 
-	minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex)
+	minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex, tile3.hex)
 
 	gr := NewGrid(minX, minY, maxX, maxY)
-	for y := minY; y < gr.maxY; y++ {
-		for x := minX; x < gr.maxX; x++ {
-			tl := NewTile(x, y)
-			id := idForGrid(*gr, x, y)
 
-			gr.tileMap[id] = tl
-		}
-	}
 	grid0 = gr
 
 	//Tile("06","02")
@@ -55,7 +49,7 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(500 * time.Millisecond)
-			g.Execute(layout)
+			g.Update(layout)
 
 			if tickerGo {
 				ticker = ticker + counter
@@ -71,11 +65,11 @@ func main() {
 
 func tileStrings(x, y int) []string {
 	tileID := idForGrid(*grid0, x, y)
-	sqr := grid0.tileMap[tileID].content
+	sqr := grid0.tileMap[tileID].lines
 	return sqr
 }
 
-func tileByID(id int) *Tile {
+func tileByID(id int) *tile {
 	return grid0.tileMap[id]
 }
 
@@ -131,11 +125,11 @@ func fillPanel(v *gocui.View) {
 		fmt.Fprintf(v, "\n Random Roll: ", strconv.Itoa(roll1dX(counter, 0)), "//////////")
 		fmt.Fprintf(v, "\n"+strconv.Itoa(mapCellX)+" mX"+"   "+strconv.Itoa(mapCellY)+" mY")
 		fmt.Fprintf(v, "\nTile Clicked: ")
-		allStr := drawGrid(*grid0)
-		lines := strings.Split(allStr, "\n")
-		bytesAr := []byte(lines[mapCellY])
+		//allStr := drawGrid(*grid0)
+		//lines := strings.Split(allStr, "\n")
+		//bytesAr := []byte(lines[mapCellY])
 
-		fmt.Fprintf(v, "\nLine: "+string(bytesAr[mapCellX]))
+		//	fmt.Fprintf(v, "\nLine: "+string(bytesAr[mapCellX]))
 		tileID := mapCellsToID(mapCellX, mapCellY)
 		mapXCoords, mapYCoords := mapCoordinates(mapCellX, mapCellY)
 		sqr := tileStrings(mapXCoords, mapYCoords)

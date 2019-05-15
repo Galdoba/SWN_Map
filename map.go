@@ -5,7 +5,7 @@ import (
 )
 
 type grid struct {
-	tileMap  map[int]*Tile
+	tileMap  map[int]*tile
 	minX     int
 	minY     int
 	maxX     int
@@ -13,69 +13,89 @@ type grid struct {
 	tileSize int
 }
 
-type screenCoords struct {
-	xCoord int
-	yCoord int
-}
-
-type Tile struct {
-	sc      screenCoords
-	content []string
-}
-
 func NewGrid(minX, minY, maxX, maxY int) *grid {
 	gr := grid{}
-	gr.tileMap = make(map[int]*Tile)
+	gr.tileMap = make(map[int]*tile)
 	gr.minX = minX
 	gr.minY = minY
 	gr.maxX = maxX
 	gr.maxY = maxY
-	gr.tileMap[0] = NewTile(0, 0)
-	gr.tileSize = len(gr.tileMap[0].content)
+	gr.tileMap[0] = newTileHex(minX, minY)
+	gr.tileSize = /*len(gr.tileMap[0].lines)*/ 16
+	idNum := 0
+	for y := gr.minY; y < gr.maxY; y++ {
+		for x := gr.minX; x < gr.maxX; x++ {
+			idNum++
+			tl := newTileHex(x, y)
+			id := /*idForGrid(*gr, x, y)*/ idNum
+			gr.tileMap[id] = tl
+		}
+	}
+	gr.tileSize = len(gr.tileMap[0].lines)
 	return &gr
 }
 
-func getScreenCoords(t Tile) screenCoords {
-	return t.sc
+func getScreenCoords(t tile) hexCoords {
+	return t.hex
 }
 
 func drawLine(s string) string {
 	return s
 }
 
+func (gr *grid) tileByXY(x, y int) *tile {
+	for _, val := range gr.tileMap {
+		if val.hex.col == x && val.hex.row == y {
+			return val
+		}
+	}
+	return nil
+}
+
 func drawGrid(gr grid) string {
 	gridStr := ""
-	for lineNum := 0; lineNum < gr.maxY*gr.tileSize; lineNum++ {
-		line := ""
-		if lineNum < 10 {
-			line = line + "0"
-		}
-		line = line + strconv.Itoa(lineNum) + " | "
-		var idStack []int
-		tileContentNum := lineNum % gr.tileSize
-		rowNum := lineNum / gr.tileSize
-		prefix := ""
-		if rowNum%2 > 0 {
-			prefix = "        " //Offset For Drawing
-		}
-		line = line + prefix
-		for i := 0; i < gr.maxX; i++ {
-			idStack = append(idStack, gr.maxX*(lineNum/gr.tileSize)+i)
-		}
+	for y := gr.minY; y <= gr.maxY; y++ {
+		for x := gr.minX; x <= gr.maxX; x++ {
+			//tile := newTileHex(x, y)
+			//for i := range tile.lines {
+			gridStr += "draw Tile(" + strconv.Itoa(x) + ";" + strconv.Itoa(y) + ") cubeCoords: " + /*cubeCoordsStr(oddQToCube(hexCoords{x, y})) + */ "\n"
+			
 
-		for i := range idStack {
-			line = line + gr.tileMap[idStack[i]].content[tileContentNum]
 		}
-		gridStr = gridStr + line + "\n"
 	}
+	return gridStr
+
+	// for lineNum := 0; lineNum < gr.maxY*gr.tileSize; lineNum++ {
+	// 	line := ""
+	// 	if lineNum < 10 {
+	// 		line = line + "0"
+	// 	}
+	// 	line = line + strconv.Itoa(lineNum) + " | "
+	// 	var idStack []int
+	// 	tileContentNum := lineNum % gr.tileSize
+	// 	rowNum := lineNum / gr.tileSize
+	// 	prefix := ""
+	// 	if rowNum%2 > 0 {
+	// 		prefix = "        " //Offset For Drawing
+	// 	}
+	// 	line = line + prefix
+	// 	for i := 0; i < gr.maxX; i++ {
+	// 		idStack = append(idStack, gr.maxX*(lineNum/gr.tileSize)+i)
+	// 	}
+
+	// 	for i := range idStack {
+	// 		line = line + gr.tileMap[idStack[i]].lines[tileContentNum]
+	// 	}
+	// 	gridStr = gridStr + line + "\n"
+	// }
 	return gridStr
 }
 
-func NewTile(x, y int) *Tile {
-	t := Tile{}
-	t.sc.xCoord = x
-	t.sc.yCoord = y
-	t.content = Square(x, y)
+func NewTile(x, y int) *tile {
+	t := tile{}
+	t.hex.col = x
+	t.hex.row = y
+	t.lines = Square(x, y)
 	return &t
 }
 
@@ -90,7 +110,7 @@ func Square(x, y int) []string {
 	sqr := []string{
 		"+--------------+",
 		"|X" + xCoord + " Y" + yCoord + " Z" + yCoord + "|",
-		"|              |",
+		"|X" + strconv.Itoa(x) + " Y" + strconv.Itoa(y) + "         |",
 		"|              |",
 		"|              |",
 		"|              |",
@@ -98,6 +118,10 @@ func Square(x, y int) []string {
 		"+--------------+",
 	}
 	return sqr
+}
+
+func (tl *tile) square() []string {
+	return tl.lines
 }
 
 func convertCoord(i int) string {

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"math"
 	"strconv"
-
-	"github.com/Galdoba/utils"
 )
 
 const (
@@ -38,6 +36,9 @@ func newTileHex(col, row int) *tile {
 		"|              |",
 		"+--------------+",
 	}
+
+	fmt.Println("Create:" + strconv.Itoa(col) + " " + strconv.Itoa(row))
+
 	return tile
 }
 
@@ -64,7 +65,7 @@ func coordNumToStr(coordName string, x int) string {
 	} else {
 		xStr += " "
 	}
-	fmt.Println("1:", xStr)
+	//fmt.Println("1:", xStr)
 	if x < 10 && x > -10 {
 		xStr += "0"
 		xStr += strconv.Itoa(x)
@@ -190,12 +191,42 @@ func cubeLine(cubeA, cubeB cubeCoords) []cubeCoords {
 	return line
 }
 
-func hexRectangleDimentions(hex1, hex2 hexCoords) (int, int, int, int) {
-	maxX := utils.Max(hex1.col, hex2.col)
-	minX := utils.Min(hex1.col, hex2.col)
-	//xDim := maxX - minX + 1
-	maxY := utils.Max(hex1.row, hex2.row)
-	minY := utils.Min(hex1.row, hex2.row)
-	//yDim := maxY - minY + 1
+func hexRectangleDimentions(hex ...hexCoords) (int, int, int, int) {
+	var rowArray []int
+	var colArray []int
+	for i := range hex {
+		rowArray = append(rowArray, hex[i].row)
+		colArray = append(colArray, hex[i].col)
+	}
+	minX := minFromIntArray(colArray)
+	minY := minFromIntArray(rowArray)
+	maxX := maxFromIntArray(colArray)
+	maxY := maxFromIntArray(rowArray)
+	// maxX := utils.Max(hex1.col, hex2.col)
+	// minX := utils.Min(hex1.col, hex2.col)
+	// //xDim := maxX - minX + 1
+	// maxY := utils.Max(hex1.row, hex2.row)
+	// minY := utils.Min(hex1.row, hex2.row)
+	// //yDim := maxY - minY + 1
 	return minX, minY, maxX, maxY
+}
+
+func minFromIntArray(slice []int) int {
+	min := slice[0]
+	for i := range slice {
+		if slice[i] < min {
+			min = slice[i]
+		}
+	}
+	return min
+}
+
+func maxFromIntArray(slice []int) int {
+	min := slice[0]
+	for i := range slice {
+		if slice[i] > min {
+			min = slice[i]
+		}
+	}
+	return min
 }
