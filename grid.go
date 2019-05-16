@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 )
 
@@ -19,6 +18,7 @@ const (
 type tile struct {
 	hex   hexCoords
 	cube  cubeCoords
+	id int
 	lines []string
 }
 
@@ -26,9 +26,10 @@ func newTileHex(col, row int) *tile {
 	tile := &tile{}
 	tile.hex = setHexCoords(col, row)
 	tile.cube = oddQToCube(tile.hex)
+	tile.id = spiralCubeToIDMAP[tile.cube]
 	tile.lines = []string{
 		"+--------------+",
-		"|" + strconv.Itoa(tile.hex.col) + " " + strconv.Itoa(tile.hex.row) + "           |",
+		"|              |",
 		"|              |",
 		"|" + cubeCoordsStr(tile.cube) + "|",
 		"|              |",
@@ -109,6 +110,8 @@ func cubeToHex(cube cubeCoords) hexCoords {
 }
 
 var hexDirections [][]hexCoords
+var cubeDirections []cubeCoords
+var spiralCubeToIDMAP map[cubeCoords]int
 
 func initGrids() {
 	// hexDirections = [][]hexCoords{
@@ -119,7 +122,15 @@ func initGrids() {
 		{hexCoords{0, -1}, hexCoords{1, -1}, hexCoords{1, 0}, hexCoords{0, 1}, hexCoords{-1, 0}, hexCoords{-1, -1}},
 		{hexCoords{0, -1}, hexCoords{1, 0}, hexCoords{1, 1}, hexCoords{0, 1}, hexCoords{-1, 1}, hexCoords{-1, 0}},
 	}
-
+	cubeDirections = []cubeCoords{
+		cubeCoords{0, 1, -1}, cubeCoords{1, 0, -1}, cubeCoords{1, -1, 0}, cubeCoords{0, -1, 1}, cubeCoords{-1, 0, 1}, cubeCoords{-1, 1, 0},
+	}
+	grandSpiral := cubeSpiral(cubeCoords{0, 0, 0}, 200)
+	idMAP := make(map[cubeCoords]int)
+	for i := range grandSpiral {
+		idMAP[grandSpiral[i]] = i
+	}
+	spiralCubeToIDMAP = idMAP
 }
 
 func info(t tile) {
@@ -140,15 +151,31 @@ func hexNeighbor(hex hexCoords, direction int) hexCoords {
 }
 
 func cubeNeighbor(cube cubeCoords, direction int) cubeCoords {
-	hex := cubeToHex(cube)
-	parity := hex.col & 1
-	dir := hexDirections[parity][direction]
-	hexN := setHexCoords(hex.col+dir.col, hex.row+dir.row)
-	return oddQToCube(hexN)
+	// hex := cubeToHex(cube)
+	// parity := hex.col & 1
+	// dir := hexDirections[parity][direction]
+	// hexN := setHexCoords(hex.col+dir.col, hex.row+dir.row)
+	// return oddQToCube(hexN)
+	cubeN := cubeCoords{cube.x + cubeDirections[direction].x, cube.y + cubeDirections[direction].y, cube.z + cubeDirections[direction].z}
+	return cubeN
 }
 
 func cubeDistance(cubeA, cubeB cubeCoords) int {
-	return int(math.Abs(float64(cubeA.x-cubeB.x)) + math.Abs(float64(cubeA.y-cubeB.y)) + math.Abs(float64(cubeA.z-cubeB.z))/2)
+	//return int(math.Abs(float64(cubeA.x-cubeB.x)) + math.Abs(float64(cubeA.y-cubeB.y)) + math.Abs(float64(cubeA.z-cubeB.z))/2)
+	xDif := cubeA.x - cubeB.x
+	if xDif < 0 {
+		xDif = xDif * -1
+	}
+	yDif := cubeA.y - cubeB.y
+	if yDif < 0 {
+		yDif = yDif * -1
+	}
+	zDif := cubeA.z - cubeB.z
+	if zDif < 0 {
+		zDif = zDif * -1
+	}
+	difArr := []int{xDif, yDif, zDif}
+	return maxFromIntArray(difArr)
 }
 
 func hexDistance(hexA, hexB hexCoords) int {
@@ -202,12 +229,7 @@ func hexRectangleDimentions(hex ...hexCoords) (int, int, int, int) {
 	minY := minFromIntArray(rowArray)
 	maxX := maxFromIntArray(colArray)
 	maxY := maxFromIntArray(rowArray)
-	// maxX := utils.Max(hex1.col, hex2.col)
-	// minX := utils.Min(hex1.col, hex2.col)
-	// //xDim := maxX - minX + 1
-	// maxY := utils.Max(hex1.row, hex2.row)
-	// minY := utils.Min(hex1.row, hex2.row)
-	// //yDim := maxY - minY + 1
+
 	return minX, minY, maxX, maxY
 }
 
@@ -229,4 +251,50 @@ func maxFromIntArray(slice []int) int {
 		}
 	}
 	return min
+}
+
+func cubeRing(center cubeCoords, radius int) (ring []cubeCoords) {
+	//двигаемся на север пока не удалимся на radius от center
+	var start cubeCoords
+	for cubeDistance(center, start) < radius {
+		start = cubeNeighbor(start, directionN)
+	}
+	//запоминаем точку старта
+	//проверяем соседей:
+	//каждый встреченный сосед находящийся на radius от center отправляется в ring
+	ring = append(ring, start)
+	done := false
+	for !done {
+		for i := 0; i < 6; i++ {
+			ringAplicant := cubeNeighbor(ring[len(ring)-1], i)
+			if ringAplicant == start {
+				return ring
+			}
+			if cubeDistance(center, ringAplicant) == radius {
+				if !coordsInRing(ringAplicant, ring) {
+					ring = append(ring, ringAplicant)
+					break
+				}
+			}
+		}
+	}
+	//если новый сосед равен старту - возвращаем ring
+	return ring
+}
+
+func cubeSpiral(center cubeCoords, radius int) (spiral []cubeCoords) {
+	spiral = append(spiral, center)
+	for i := 1; i < radius+1; i++ {
+		spiral = append(spiral, cubeRing(center, i)...)
+	}
+	return spiral
+}
+
+func coordsInRing(cube cubeCoords, ring []cubeCoords) bool {
+	for i := range ring {
+		if cube == ring[i] {
+			return true
+		}
+	}
+	return false
 }

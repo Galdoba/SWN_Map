@@ -34,9 +34,19 @@ func main() {
 
 	bindKeys(g)
 
-	tile1 := newTileHex(-1, -3)
-	tile2 := newTileHex(-2, -1)
-	tile3 := newTileHex(1, 1)
+	tile1 := newTileHex(0, 0)
+	tile2 := newTileHex(1, 0)
+	tile3 := newTileHex(0, 1)
+
+	fmt.Println(spiralCubeToIDMAP[tile1.cube], "is ID for tile 1")
+	fmt.Println(spiralCubeToIDMAP[tile2.cube], "is ID for tile 2")
+	fmt.Println(spiralCubeToIDMAP[tile3.cube], "is ID for tile 3")
+
+	// fmt.Println(cubeRing(tile1.cube, 2))
+	// fmt.Println(cubeSpiral(tile1.cube, 0))
+	// for i := 0; i < 10; i++ {
+	// 	fmt.Println("Spiral with", i, "radius has", len(cubeSpiral(tile1.cube, i)), "hexes and has id =")
+	// }
 
 	minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex, tile3.hex)
 
@@ -63,11 +73,13 @@ func main() {
 	}
 }
 
-func tileStrings(x, y int) []string {
-	tileID := idForGrid(*grid0, x, y)
-	sqr := grid0.tileMap[tileID].lines
-	return sqr
-}
+// func tileStrings(x, y int) []string {
+// 	tileID := hexToID(hexCoords{x, y})
+// 	fmt.Println(grid0.tileMap)
+
+// 	sqr := grid0.tileMap[tileID].lines
+// 	return sqr
+// }
 
 func tileByID(id int) *tile {
 	return grid0.tileMap[id]
@@ -115,14 +127,14 @@ func fillPanel(v *gocui.View) {
 		ts := runStart.Format("2006-Jan-02 15:04:05")
 		fmt.Fprintf(v, "Current Real Time: %s \n", t)
 		fmt.Fprintf(v, "RunStart: %s\n", ts)
-		//s := time.Since(runStart).Round(time.Millisecond)
-		s := 567.2
+		s := time.Since(runStart).Round(time.Millisecond)
+		//s := 567.2
 		pureSeconds := float64(time.Millisecond) + 567
 
 		fmt.Fprintf(v, "Program working: %s\n Sec: %d\n", s, pureSeconds/1000)
 		fmt.Fprintf(v, "%d, %d\n", ticker, counter)
 		fmt.Fprintf(v, "rume 'm' = %d", string(rune(109)))
-		fmt.Fprintf(v, "\n Random Roll: ", strconv.Itoa(roll1dX(counter, 0)), "//////////")
+		//fmt.Fprintf(v, "\n Random Roll: ", strconv.Itoa(roll1dX(counter, 0)), "//////////")
 		fmt.Fprintf(v, "\n"+strconv.Itoa(mapCellX)+" mX"+"   "+strconv.Itoa(mapCellY)+" mY")
 		fmt.Fprintf(v, "\nTile Clicked: ")
 		//allStr := drawGrid(*grid0)
@@ -131,12 +143,12 @@ func fillPanel(v *gocui.View) {
 
 		//	fmt.Fprintf(v, "\nLine: "+string(bytesAr[mapCellX]))
 		tileID := mapCellsToID(mapCellX, mapCellY)
-		mapXCoords, mapYCoords := mapCoordinates(mapCellX, mapCellY)
-		sqr := tileStrings(mapXCoords, mapYCoords)
-		for i := range sqr {
-			fmt.Fprintf(v, "\n"+sqr[i])
-			//fmt.Fprintf(v, "\ntickerGo is active")
-		}
+		//mapXCoords, mapYCoords := mapCoordinates(mapCellX, mapCellY)
+		//sqr := tileStrings(mapXCoords, mapYCoords)
+		//for i := range sqr {
+		//	fmt.Fprintf(v, "\n"+sqr[i])
+		//	//fmt.Fprintf(v, "\ntickerGo is active")
+		//}
 		fmt.Fprintf(v, "\n Tile ID: "+strconv.Itoa(tileID))
 	case "Info":
 		v.Clear()
@@ -172,4 +184,16 @@ func mapCoordinates(mapCellX, mapCellY int) (mapXCoords int, mapYCoords int) {
 |      Ansa Tau|
 |player is here|
 +--------------+
+
+
+aaaa    cccc
+aaaa    cccc
+ddddbbbbffff
+ddddbbbbffff
+    eeee
+    eeee
+
+
+
+
 */
