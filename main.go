@@ -34,9 +34,9 @@ func main() {
 
 	bindKeys(g)
 
-	tile1 := newTileHex(0, 0)
-	tile2 := newTileHex(1, 0)
-	tile3 := newTileHex(0, 1)
+	tile1 := newTileHex(1, 1)
+	tile2 := newTileHex(6, 6)
+	tile3 := newTileHex(3, 3)
 
 	fmt.Println(spiralCubeToIDMAP[tile1.cube], "is ID for tile 1")
 	fmt.Println(spiralCubeToIDMAP[tile2.cube], "is ID for tile 2")
@@ -142,14 +142,14 @@ func fillPanel(v *gocui.View) {
 		//bytesAr := []byte(lines[mapCellY])
 
 		//	fmt.Fprintf(v, "\nLine: "+string(bytesAr[mapCellX]))
-		tileID := mapCellsToID(mapCellX, mapCellY)
+		//tileID := mapCellsToID(mapCellX, mapCellY)
 		//mapXCoords, mapYCoords := mapCoordinates(mapCellX, mapCellY)
 		//sqr := tileStrings(mapXCoords, mapYCoords)
 		//for i := range sqr {
 		//	fmt.Fprintf(v, "\n"+sqr[i])
 		//	//fmt.Fprintf(v, "\ntickerGo is active")
 		//}
-		fmt.Fprintf(v, "\n Tile ID: "+strconv.Itoa(tileID))
+		//fmt.Fprintf(v, "\n Tile ID: "+strconv.Itoa(tileID))
 	case "Info":
 		v.Clear()
 
@@ -158,11 +158,11 @@ func fillPanel(v *gocui.View) {
 
 }
 
-func mapCellsToID(mapCellX, mapCellY int) int {
-	mapXCoords, mapYCoords := mapCoordinates(mapCellX, mapCellY)
-	tileID := idForGrid(*grid0, mapXCoords, mapYCoords)
-	return tileID
-}
+// func mapCellsToID(mapCellX, mapCellY int) int {
+// 	mapXCoords, mapYCoords := mapCoordinates(mapCellX, mapCellY)
+// 	tileID := idForGrid(*grid0, mapXCoords, mapYCoords)
+// 	return tileID
+// }
 
 func mapCoordinates(mapCellX, mapCellY int) (mapXCoords int, mapYCoords int) {
 	mapYCoords = (0 + mapCellY) / 6

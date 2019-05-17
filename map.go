@@ -53,32 +53,44 @@ func (gr *grid) tileByXY(x, y int) *tile {
 
 func drawGrid(gr grid) string {
 	gridStr := ""
-	totalRows := gr.maxY - gr.minY + 1
-	totalCols := gr.maxX - gr.minX + 1
-	tilelines := 8
-	totalSegments := (totalRows * totalCols * tilelines) + (totalCols * tilelines / 2)
-	//panic("stop")
-	gridStr += "Tile ID =" + strconv.Itoa(totalCols) + strconv.Itoa(totalRows) + strconv.Itoa(tilelines) + " " + strconv.Itoa(totalSegments)
-	for y := gr.minY; y <= gr.maxY; y++ {
-		for x := gr.minX; x <= gr.maxX; x++ {
-			// gridStr += "draw Tile(" + strconv.Itoa(x) + ";" + strconv.Itoa(y) + ") cubeCoords: " + /*cubeCoordsStr(oddQToCube(hexCoords{x, y})) + */ "\n"
-			// id := hexToID(hexCoords{x, y})
-			// var sqrLN []string
-			// if val, ok := gr.tileMap[id]; ok {
-			// 	sqrLN = val.lines
-			// }
-			// gridStr += "Tile ID =" + strconv.Itoa(id) + "\n"
-			// for i := range sqrLN {
-			// 	gridStr += sqrLN[i] + "\n"
-			// }
-
-		}
+	// var idList []int
+	// for y := gr.minY; y <= gr.maxY; y++ {
+	// 	for x := gr.minX; x <= gr.maxX; x++ {
+	// 		id := hexToID(hexCoords{x, y})
+	// 		idList = append(idList, id)
+	// 		gridStr += "| " + strconv.Itoa(id) + "\n"
+	// 	}
+	// }
+	tSegments := totalSegments(gr)
+	for i := 0; i < tSegments; i++ {
+		gridStr += defineSegment(i, gr)
 	}
 	return gridStr
 
 }
 
+func totalSegments(gr grid) int {
+	totalRows := gr.maxY - gr.minY + 1
+	totalCols := gr.maxX - gr.minX + 1
+	tilelines := 8
+	totalSegments := (totalRows * totalCols * tilelines) + (totalCols * tilelines / 2)
+	return totalSegments
+}
+
 func defineSegment(segment int, gr grid) string {
+	//output := "        "
+	totalRows := gr.maxY - gr.minY + 1
+	totalCols := gr.maxX - gr.minX + 1
+	//tilelines := 8
+	//totalSegments := (totalRows * totalCols * tilelines) + (totalCols * tilelines / 2)
+	col := (segment) % totalCols
+	offset := false
+	if col%2 > 0 {
+		offset = true
+	}
+	row := segment / totalCols / 8
+	line := segment / totalCols % 8
+
 	/*
 		псевдокод:
 		segment / totalCol = row
@@ -96,13 +108,50 @@ func defineSegment(segment int, gr grid) string {
 		}
 		return gr.hex(col - gr.minX, row - gr.minY).line[line]
 	*/
-	offset := false
-	if segment%2 == 1 {
-		offset = true
-	}
-	totalCols := gr.maxX - gr.minX + 1
-	line := segment % totalCols
 
+	if offset {
+		line = line - 4
+		if line < 0 {
+			line = line + 8
+			row--
+			if row < 0 {
+				str := "     OFSETT     "
+				return str
+			}
+		}
+	} else {
+		if row > totalRows {
+			//panic(segment)
+			str := "     OFSETT2    "
+			gridX := gr.minX + col
+			if gridX == gr.minX+totalCols {
+				str = str + "NEWLINE\n"
+			}
+			return str
+		}
+	}
+	gridX := gr.minX + col
+	gridY := gr.minY + row /*/8*/
+	str := "          "
+	id := hexToID(hexCoords{gridX, gridY})
+	if val, ok := gr.tileMap[id]; ok {
+		str = val.lines[line]
+	} else {
+		str = "BLANK LN        "
+	}
+	if gridX == gr.maxX {
+		str = str + "NEWLINE\n"
+	}
+
+	//fmt.Println(col, row, line, " = ", gridX, gridY, offset, id, str)
+	if segment == 32 {
+		//fmt.Println("segment", segment)
+		//fmt.Println("offset, row, line")
+		//fmt.Println(col, row, line, " = ", gridX, gridY, offset)
+
+		//os.Exit(2)
+	}
+	return str
 }
 
 func NewTile(x, y int) *tile {
@@ -113,9 +162,9 @@ func NewTile(x, y int) *tile {
 	return &t
 }
 
-func idForGrid(g grid, x, y int) int {
-	return (g.maxX * y) + x
-}
+// func idForGrid(g grid, x, y int) int {
+// 	return (g.maxX * y) + x
+// }
 
 func hexToID(hex hexCoords) int {
 	cube := oddQToCube(hex)

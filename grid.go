@@ -18,7 +18,7 @@ const (
 type tile struct {
 	hex   hexCoords
 	cube  cubeCoords
-	id int
+	id    int
 	lines []string
 }
 
@@ -30,7 +30,7 @@ func newTileHex(col, row int) *tile {
 	tile.lines = []string{
 		"+--------------+",
 		"|              |",
-		"|              |",
+		"|" + hexCoordsStr(tile.hex) + "|",
 		"|" + cubeCoordsStr(tile.cube) + "|",
 		"|              |",
 		"|              |",
@@ -38,9 +38,17 @@ func newTileHex(col, row int) *tile {
 		"+--------------+",
 	}
 
-	fmt.Println("Create:" + strconv.Itoa(col) + " " + strconv.Itoa(row))
-
+	//	fmt.Println("Create:" + strconv.Itoa(col) + " " + strconv.Itoa(row))
 	return tile
+}
+
+func hexCoordsStr(hex hexCoords) string {
+	//fmt.Println(cube)
+	xStr := coordNumToStr("X", hex.col)
+	yStr := coordNumToStr("Y", hex.row)
+
+	output := xStr + " " + yStr + "     "
+	return output
 }
 
 type cubeCoords struct {
@@ -50,7 +58,7 @@ type cubeCoords struct {
 }
 
 func cubeCoordsStr(cube cubeCoords) string {
-	fmt.Println(cube)
+	//fmt.Println(cube)
 	xStr := coordNumToStr("X", cube.x)
 	yStr := coordNumToStr("Y", cube.y)
 	zStr := coordNumToStr("Z", cube.z)
