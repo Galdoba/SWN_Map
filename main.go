@@ -34,9 +34,9 @@ func main() {
 
 	bindKeys(g)
 
-	tile1 := newTileHex(0, 0)
-	tile2 := newTileHex(0, 0)
-	tile3 := newTileHex(0, 0)
+	tile1 := newTileHex(-1, -1)
+	tile2 := newTileHex(-3, 1)
+	tile3 := newTileHex(2, 2)
 
 	fmt.Println(spiralCubeToIDMAP[tile1.cube], "is ID for tile 1")
 	fmt.Println(spiralCubeToIDMAP[tile2.cube], "is ID for tile 2")
@@ -48,10 +48,10 @@ func main() {
 	// 	fmt.Println("Spiral with", i, "radius has", len(cubeSpiral(tile1.cube, i)), "hexes and has id =")
 	// }
 
-	//minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex, tile3.hex)
+	minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex, tile3.hex)
 
-	//gr = NewGrid(minX, minY, maxX, maxY)
-	gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
+	gr = NewGrid(minX, minY, maxX, maxY)
+	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
 	//Tile("06","02")
 
 	go func() {
@@ -119,7 +119,20 @@ func fillPanel(v *gocui.View) {
 		fmt.Fprintf(v, "%d, %d\n", ticker, counter)
 		fmt.Fprintf(v, "rume 'm' = %d", string(rune(109)))
 		fmt.Fprintf(v, "\n"+strconv.Itoa(mapCellX)+" mX"+"   "+strconv.Itoa(mapCellY)+" mY")
-		fmt.Fprintf(v, "\nTile Clicked: ")
+		fmt.Fprintf(v, "\n"+strconv.Itoa(mapCellXLast)+" mXl"+"   "+strconv.Itoa(mapCellYLast)+" mYl")
+		fmt.Fprintf(v, "\nTile Clicked: \n")
+		hexID := gr.tileByClick(mapCellX, mapCellY)
+		var lines []string
+		if val, ok := gr.tileMap[hexID]; ok {
+			lines = val.lines
+		} else {
+			lines = append(lines, " ")
+		}
+
+		for i := range lines {
+			fmt.Fprintf(v, lines[i]+"\n")
+		}
+
 	case "Info":
 		v.Clear()
 
@@ -127,8 +140,6 @@ func fillPanel(v *gocui.View) {
 	}
 
 }
-
-
 
 /*
 

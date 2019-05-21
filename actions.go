@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/jroimartin/gocui"
@@ -78,12 +79,19 @@ func toggleTicker() {
 
 func actionButtonClick(g *gocui.Gui, v *gocui.View) error {
 	err := executeClick(v)
-
+	hexID := gr.tileByClick(mapCellX, mapCellY)
+	lines := gr.tileMap[hexID].lines
+	view, _ := g.View("Size")
+	fmt.Fprintf(view, "ping")
+	for i := range lines {
+		fmt.Fprintf(view, lines[i])
+	}
 	return err
 }
 
 func actionSelectClick(g *gocui.Gui, v *gocui.View) error {
 	err := executeClick(v)
+
 	return err
 }
 
@@ -101,6 +109,8 @@ func actionChangeColor(g *gocui.Gui, v *gocui.View) error {
 func executeClick(v *gocui.View) error {
 	switch v.Title {
 	case "Info":
+		mapCellXLast = mapCellX
+		mapCellYLast = mapCellY
 		oX, oY := v.Origin()
 		clX, clY := v.Cursor()
 		mapCellX = oX + clX

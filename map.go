@@ -87,18 +87,32 @@ func absInt(i int) int {
 	return 0
 }
 
+func offsetNeeded(col int) bool {
+	if absInt(col)%2 > 0 {
+		return true
+	}
+	return false
+}
+
 func defineSegment(segment int, gr grid) string {
 	totalCols := gr.maxX - gr.minX + 1
 	col := (segment) % totalCols
-	offset := false
+	//offset := false
 	row := segment / totalCols / 8
 	line := segment / totalCols % 8
 	gridX := gr.minX + col
 	str := "                "
-	if absInt(gridX)%2 > 0 {
-		offset = true
-	}
-	if offset {
+	// if absInt(gridX)%2 > 0 {
+	// 	offset = true
+	// }
+	// if offset {
+	// 	line = line - 4
+	// 	if line < 0 {
+	// 		line = line + 8
+	// 		row--
+	// 	}
+	// }
+	if offsetNeeded(gridX) {
 		line = line - 4
 		if line < 0 {
 			line = line + 8
@@ -116,6 +130,19 @@ func defineSegment(segment int, gr grid) string {
 		str = str + " \n"
 	}
 	return str
+}
+
+func (gr *grid) tileByClick(mX, mY int) int {
+	col := mX / 16
+	hexX := gr.minX + col
+	if offsetNeeded(hexX) {
+		mY = mY - 4
+	}
+	row := mY / 8
+	hexY := gr.minY + row
+	hexCrd := setHexCoords(hexX, hexY)
+	id := hexToID(hexCrd)
+	return id
 }
 
 func NewTile(x, y int) *tile {
@@ -144,7 +171,7 @@ func Square(x, y int) []string {
 		"|X" + xCoord + " Y" + yCoord + " Z" + yCoord + "|",
 		"|X" + strconv.Itoa(x) + " Y" + strconv.Itoa(y) + "         |",
 		"|              |",
-		"|              |",
+		"| " + convertCoord(hexToID(hexCoords{x, y})) + "           |",
 		"|              |",
 		"|              |",
 		"+--------------+",

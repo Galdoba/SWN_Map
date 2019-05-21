@@ -33,7 +33,7 @@ func newTileHex(col, row int) *tile {
 		"|" + hexCoordsStr(tile.hex) + "|",
 		"|" + cubeCoordsStr(tile.cube) + "|",
 		"|              |",
-		"|              |",
+		"| " + convertCoord(hexToID(tile.hex)) + "          |",
 		"|              |",
 		"+--------------+",
 	}
