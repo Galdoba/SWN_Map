@@ -123,6 +123,10 @@ func defineSegment(segment int, gr grid) string {
 	id := hexToID(hexCoords{gridX, gridY})
 	if val, ok := gr.tileMap[id]; ok {
 		str = val.lines[line]
+		if line == 4 || line == 3 {
+			str = "|" + sect.getStar(val.hex) + "|"
+
+		}
 		// } else {
 		// 	str = "                "
 	}
@@ -137,6 +141,9 @@ func (gr *grid) tileByClick(mX, mY int) int {
 	hexX := gr.minX + col
 	if offsetNeeded(hexX) {
 		mY = mY - 4
+		if mY < 0 {
+			return -1
+		}
 	}
 	row := mY / 8
 	hexY := gr.minY + row
@@ -200,32 +207,3 @@ func convertCoord(i int) string {
 	}
 	return coord
 }
-
-/*
-  +-------------+
-  |         ||  |
-  |1234567890123|
-  |             |+----------+
-  |             |
-  |             ||ABCDEFGHIJ|
-  +-------------+|1234567890|
-  +----------+|          |
-  |          ||          |
-  |          |+----------+
-  |          |
-  |          |
-  +----------+
-
-
-
-+--+    +--+
-|  |    |  |
-|  |+--+|  |
-+--+|  |+--+
-+--+|  |+--+
-|  |+--+|  |
-|  |+--+|  |
-+--+|  |+--+
-	|  |
-	+--+
-*/

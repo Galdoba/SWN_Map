@@ -15,6 +15,7 @@ var tickerGo bool
 var appErr error
 var runStart time.Time
 var gr *grid
+var sect *sector
 var mapCellX int
 var mapCellY int
 var mapCellXLast int
@@ -53,6 +54,12 @@ func main() {
 	gr = NewGrid(minX, minY, maxX, maxY)
 	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
 	//Tile("06","02")
+	sect = NewSector()
+	sect.putStars()
+	for key, val := range sect.zoneByHex {
+		fmt.Println(val, key)
+	}
+	//os.Exit(5)
 
 	go func() {
 		for {
@@ -143,14 +150,25 @@ func fillPanel(v *gocui.View) {
 
 /*
 
+Navigation Mode
 +--------------+
-|X-00 Y+00 Z-00|
-|        Nebula|
-|Star:  G2134a3|
-|*P  *St    *Mf|
-|      Ansa Tau|
-|player is here|
+|Sector: V01H01| - coordinates
+|        Nebula| - space conditions
+|Star:  G2134a3| - star profile
+|*P  *St    *Mf| - main world profile
+|      Ansa Tau| - main world name
+|player is here| - player marker
 +--------------+
 
+Trade Mode
++--------------+
+|Sector: V01H01| - coordinates
+|      Ansa Tau| - main world name
+|P9/L10/F5     | - population profile
+|      L-123456| - regulation profile
+|              | - main world name
+|P    F    Pr  | - player/Factor marker
++--------------+
+ Sector: V01H01
 
 */

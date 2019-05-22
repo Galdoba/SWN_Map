@@ -29,11 +29,11 @@ func newTileHex(col, row int) *tile {
 	tile.id = spiralCubeToIDMAP[tile.cube]
 	tile.lines = []string{
 		"+--------------+",
-		"|              |",
 		"|" + hexCoordsStr(tile.hex) + "|",
-		"|" + cubeCoordsStr(tile.cube) + "|",
 		"|              |",
-		"| " + convertCoord(hexToID(tile.hex)) + "          |",
+		"|              |",
+		"|              |",
+		"|              |",
 		"|              |",
 		"+--------------+",
 	}
@@ -43,12 +43,28 @@ func newTileHex(col, row int) *tile {
 }
 
 func hexCoordsStr(hex hexCoords) string {
-	//fmt.Println(cube)
-	xStr := coordNumToStr("X", hex.col)
-	yStr := coordNumToStr("Y", hex.row)
-
-	output := xStr + " " + yStr + "     "
-	return output
+	col := hex.col
+	row := hex.row
+	res := "    "
+	if col < 0 {
+		res += "v"
+	} else {
+		res += "V"
+	}
+	if absInt(col)/10 == 0 {
+		res += "0"
+	}
+	res += strconv.Itoa(absInt(col))
+	if row < 0 {
+		res += "h"
+	} else {
+		res += "H"
+	}
+	if absInt(row)/10 == 0 {
+		res += "0"
+	}
+	res += strconv.Itoa(absInt(col))
+	return res + "    "
 }
 
 type cubeCoords struct {
