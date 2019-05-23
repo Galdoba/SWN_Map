@@ -15,7 +15,6 @@ var tickerGo bool
 var appErr error
 var runStart time.Time
 var gr *grid
-var sect *sector
 var mapCellX int
 var mapCellY int
 var mapCellXLast int
@@ -35,9 +34,9 @@ func main() {
 
 	bindKeys(g)
 
-	tile1 := newTileHex(-1, -1)
-	tile2 := newTileHex(-3, 1)
-	tile3 := newTileHex(2, 2)
+	tile1 := newTileHex(0, 0)
+	tile2 := newTileHex(0, 0)
+	tile3 := newTileHex(0, 0)
 
 	fmt.Println(spiralCubeToIDMAP[tile1.cube], "is ID for tile 1")
 	fmt.Println(spiralCubeToIDMAP[tile2.cube], "is ID for tile 2")
@@ -54,12 +53,17 @@ func main() {
 	gr = NewGrid(minX, minY, maxX, maxY)
 	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
 	//Tile("06","02")
-	sect = NewSector()
-	sect.putStars()
-	for key, val := range sect.zoneByHex {
+
+	fmt.Println(drawGrid(*gr))
+	var startHex hexCoords
+	for key, val := range gr.sector.zoneByHex {
 		fmt.Println(val, key)
+		startHex = key
+		break
+		fmt.Println(startHex)
 	}
-	//os.Exit(5)
+
+	//os.Exit(1)
 
 	go func() {
 		for {

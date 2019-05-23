@@ -58,6 +58,9 @@ func actionIncreaseCounter(g *gocui.Gui, v *gocui.View) error {
 		return gocui.ErrQuit
 	}
 	//toggleTicker()
+	// tile1 := newTileHex(-1, -1)
+	// gr.addTile(tile1)
+	gr.addRandomSector()
 	return nil
 }
 

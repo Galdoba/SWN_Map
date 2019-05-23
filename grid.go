@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/Galdoba/utils"
 )
 
 const (
@@ -63,7 +65,7 @@ func hexCoordsStr(hex hexCoords) string {
 	if absInt(row)/10 == 0 {
 		res += "0"
 	}
-	res += strconv.Itoa(absInt(col))
+	res += strconv.Itoa(absInt(row))
 	return res + "    "
 }
 
@@ -321,4 +323,65 @@ func coordsInRing(cube cubeCoords, ring []cubeCoords) bool {
 		}
 	}
 	return false
+}
+
+func (gr *grid) addTile(tl *tile) {
+	var existingTiles []hexCoords
+	for _, val := range gr.tileMap {
+		existingTiles = append(existingTiles, val.hex)
+	}
+	existingTiles = append(existingTiles, tl.hex)
+	id := hexToID(tl.hex)
+	gr.tileMap[id] = tl
+	gr.minX, gr.minY, gr.maxX, gr.maxY = hexRectangleDimentions(existingTiles...)
+	// for y := gr.minY; y <= gr.maxY; y++ {
+	// 	for x := gr.minX; x <= gr.maxX; x++ {
+	// 		id := hexToID(hexCoords{x, y})
+	// 		if _, ok := gr.tileMap[id]; !ok {
+	// 			tl := newTileHex(x, y)
+	// 			id := hexToID(tl.hex)
+	// 			gr.tileMap[id] = tl
+
+	// 		}
+	// 	}
+	// }
+
+}
+
+func (gr *grid) addRandomSector() {
+	again := true
+	//выбираем случайный тайл
+	for again {
+		var rTile *tile
+		for _, val := range gr.tileMap {
+			rTile = val
+			break
+		}
+		//состовляем список его соседей
+
+		var neibours []cubeCoords
+		for dir := 0; dir < 6; dir++ {
+			if val, ok := gr.tileMap[rTile.id]; ok {
+				neibours = append(neibours, cubeNeighbor(val.cube, dir))
+
+			}
+		}
+
+		//если у тайла нет исследованых соседей - рестарт
+		if len(neibours) == 0 {
+			continue
+		}
+		//panic(4)
+		//создаем не исследованного соседа
+		d := strconv.Itoa(len(neibours))
+		r := utils.RollDice("d"+d, -1)
+		nTile := newTileHex(cubeToHex(neibours[r]).col, cubeToHex(neibours[r]).row)
+		for key, _ := range gr.tileMap {
+			if nTile.id != key {
+				gr.addTile(nTile)
+				again = false
+			}
+		}
+	}
+	//panic(1)
 }

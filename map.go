@@ -6,6 +6,7 @@ import (
 
 type grid struct {
 	tileMap  map[int]*tile
+	sector   *sector
 	minX     int
 	minY     int
 	maxX     int
@@ -30,6 +31,8 @@ func NewGrid(minX, minY, maxX, maxY int) *grid {
 			gr.tileMap[id] = tl
 		}
 	}
+	gr.sector = NewSector()
+	gr.putStars()
 	//gr.tileSize = len(gr.tileMap[0].lines)
 	return &gr
 }
@@ -124,7 +127,7 @@ func defineSegment(segment int, gr grid) string {
 	if val, ok := gr.tileMap[id]; ok {
 		str = val.lines[line]
 		if line == 4 || line == 3 {
-			str = "|" + sect.getStar(val.hex) + "|"
+			str = "|" + gr.sector.getStar(val.hex) + "|"
 
 		}
 		// } else {

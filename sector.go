@@ -8,6 +8,7 @@ import (
 type sector struct {
 	name      string
 	zoneByHex map[hexCoords]string
+	starByHex map[hexCoords]string
 }
 
 func NewSector() *sector {
@@ -16,22 +17,50 @@ func NewSector() *sector {
 	return sect
 }
 
-func (sctr *sector) putStars() {
+func (gr *grid) putStars() {
 	for _, val := range gr.tileMap {
-		sctr.zoneByHex[val.hex] = "              "
+		gr.sector.zoneByHex[val.hex] = "      unknown "
 	}
 	for _, val := range gr.tileMap {
-		if sctr.zoneByHex[val.hex] == "              " {
-			r := utils.RollDice("d6")
-			if r > 3 {
-				sctr.zoneByHex[val.hex] = "      SS      "
+		if gr.sector.zoneByHex[val.hex] == "      unknown " {
+			r := utils.RollDice("d20")
+			if r == 20 {
+				gr.sector.zoneByHex[val.hex] = newZone()
+			} else {
+				gr.sector.zoneByHex[val.hex] = "Normal Space  "
 			}
 		}
 	}
 }
 
 func (sctr *sector) getStar(hex hexCoords) string {
-	return sctr.zoneByHex[hex]
+	if sctr.zoneByHex[hex] != "" {
+		return sctr.zoneByHex[hex]
+	}
+	return "              "
+}
+
+func newZone() string {
+	r1 := utils.RollDice("d6")
+	if r1 == 6 {
+		return "Weird Energy "
+	}
+	return newNaturalZone()
+}
+
+func newNaturalZone() string {
+	r := utils.RollDice("d4")
+	switch r {
+	case 1:
+		return "Nebula"
+	case 2:
+		return "Void"
+	case 3:
+		return "Dust Cloud"
+	case 4:
+		return "Plasma"
+	}
+	return "Error"
 }
 
 /*
