@@ -6,26 +6,48 @@ import (
 
 //Sector - содержит о себе всю информацию о вселенной.
 type sector struct {
-	name      string
-	zoneByHex map[hexCoords]string
-	starByHex map[hexCoords]string
+	name       string
+	zone       []*zone
+	zoneByHex  map[hexCoords]string
+	zoneByHex0 map[hexCoords]*zone
+	starByHex  map[hexCoords]string
+}
+
+type zone struct {
+	zoneID   int
+	zoneType string
+	zoneSize int
 }
 
 func NewSector() *sector {
 	sect := &sector{}
 	sect.zoneByHex = make(map[hexCoords]string)
+	sect.zoneByHex0 = make(map[hexCoords]*zone)
 	return sect
 }
 
-func (gr *grid) putStars() {
+func zoneUnknown() *zone {
+	return &zone{0, "      Unknown ", 0}
+}
+
+func (gr *grid) setZones() {
+	totalZones := 0
 	for _, val := range gr.tileMap {
 		gr.sector.zoneByHex[val.hex] = "      unknown "
+		gr.sector.zoneByHex0[val.hex] = zoneUnknown()
 	}
+
 	for _, val := range gr.tileMap {
 		if gr.sector.zoneByHex[val.hex] == "      unknown " {
+			zl := gr.sector.borderZonesList(oddQToCube(val.hex))
+			if len(zl) < 1 {
+				//step A
+			}
 			r := utils.RollDice("d20")
 			if r == 20 {
+				totalZones++
 				gr.sector.zoneByHex[val.hex] = newZone()
+
 			} else {
 				gr.sector.zoneByHex[val.hex] = "Normal Space  "
 			}
@@ -54,13 +76,25 @@ func newNaturalZone() string {
 	case 1:
 		return "Nebula"
 	case 2:
-		return "Void"
+		return "Void          "
 	case 3:
-		return "Dust Cloud"
+		return "Dust Cloud    "
 	case 4:
-		return "Plasma"
+		return "Plasma        "
 	}
 	return "Error"
+}
+
+func (sector *sector) borderZonesList(cube cubeCoords) []*zone {
+	var zL []*zone
+	for i := 0; i < 6; i++ {
+		neib := cubeToHex(cubeNeighbor(cube, i))
+		if sector.zoneByHex0[neib] != zoneUnknown() {
+			zL = append(zL, sector.zoneByHex0[neib])
+		}
+
+	}
+	return zL
 }
 
 /*

@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Galdoba/utils"
+
 	"github.com/jroimartin/gocui"
 )
 
@@ -21,6 +23,10 @@ var mapCellXLast int
 var mapCellYLast int
 
 func main() {
+	minX := utils.InputInt("Set Grid.minX")
+	minY := utils.InputInt("Set Grid.minY")
+	maxX := utils.InputInt("Set Grid.maxX")
+	maxY := utils.InputInt("Set Grid.maxY")
 	initGrids()
 	runStart = time.Now()
 	counter = 1
@@ -36,11 +42,9 @@ func main() {
 
 	tile1 := newTileHex(0, 0)
 	tile2 := newTileHex(0, 0)
-	tile3 := newTileHex(0, 0)
 
 	fmt.Println(spiralCubeToIDMAP[tile1.cube], "is ID for tile 1")
 	fmt.Println(spiralCubeToIDMAP[tile2.cube], "is ID for tile 2")
-	fmt.Println(spiralCubeToIDMAP[tile3.cube], "is ID for tile 3")
 
 	// fmt.Println(cubeRing(tile1.cube, 2))
 	// fmt.Println(cubeSpiral(tile1.cube, 0))
@@ -48,7 +52,7 @@ func main() {
 	// 	fmt.Println("Spiral with", i, "radius has", len(cubeSpiral(tile1.cube, i)), "hexes and has id =")
 	// }
 
-	minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex, tile3.hex)
+	//minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex)
 
 	gr = NewGrid(minX, minY, maxX, maxY)
 	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))

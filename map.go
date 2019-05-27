@@ -32,7 +32,7 @@ func NewGrid(minX, minY, maxX, maxY int) *grid {
 		}
 	}
 	gr.sector = NewSector()
-	gr.putStars()
+	gr.setZones()
 	//gr.tileSize = len(gr.tileMap[0].lines)
 	return &gr
 }
