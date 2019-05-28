@@ -17,12 +17,15 @@ var tickerGo bool
 var appErr error
 var runStart time.Time
 var gr *grid
+var sect *sector
 var mapCellX int
 var mapCellY int
 var mapCellXLast int
 var mapCellYLast int
 
 func main() {
+	seed := utils.RandomSeed()
+	fmt.Println(seed)
 	minX := utils.InputInt("Set Grid.minX")
 	minY := utils.InputInt("Set Grid.minY")
 	maxX := utils.InputInt("Set Grid.maxX")
@@ -40,8 +43,8 @@ func main() {
 
 	bindKeys(g)
 
-	tile1 := newTileHex(0, 0)
-	tile2 := newTileHex(0, 0)
+	tile1 := newTileHex(1, 2)
+	tile2 := newTileHex(2, 2)
 
 	fmt.Println(spiralCubeToIDMAP[tile1.cube], "is ID for tile 1")
 	fmt.Println(spiralCubeToIDMAP[tile2.cube], "is ID for tile 2")
@@ -55,17 +58,17 @@ func main() {
 	//minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex)
 
 	gr = NewGrid(minX, minY, maxX, maxY)
+	sect = NewSector()
+	sect.setZones()
+	sect.addStarByHex(tile2.hex, "Test Star")
+	sect.NewZone(1, "Dust Cloud    ", tile2.hex)
+	//sect.zoneByHex[tile2.hex].expandZone(tile1.hex)
+	sect.zone[0].expandZone(tile1.hex)
+	sect.NewZone(2, strconv.Itoa(sect.zoneByHex[tile2.hex].zoneSize)+" Dust Cloud  ", hexCoords{2, 3})
 	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
 	//Tile("06","02")
 
 	fmt.Println(drawGrid(*gr))
-	var startHex hexCoords
-	for key, val := range gr.sector.zoneByHex {
-		fmt.Println(val, key)
-		startHex = key
-		break
-		fmt.Println(startHex)
-	}
 
 	//os.Exit(1)
 

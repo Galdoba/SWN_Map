@@ -6,11 +6,10 @@ import (
 
 //Sector - содержит о себе всю информацию о вселенной.
 type sector struct {
-	name       string
-	zone       []*zone
-	zoneByHex  map[hexCoords]string
-	zoneByHex0 map[hexCoords]*zone
-	starByHex  map[hexCoords]string
+	name      string
+	zone      []*zone
+	zoneByHex map[hexCoords]*zone
+	starByHex map[hexCoords]string
 }
 
 type zone struct {
@@ -21,51 +20,54 @@ type zone struct {
 
 func NewSector() *sector {
 	sect := &sector{}
-	sect.zoneByHex = make(map[hexCoords]string)
-	sect.zoneByHex0 = make(map[hexCoords]*zone)
+	sect.zoneByHex = make(map[hexCoords]*zone)
+	sect.starByHex = make(map[hexCoords]string)
+
 	return sect
 }
 
-func zoneUnknown() *zone {
-	return &zone{0, "      Unknown ", 0}
+func (sect *sector) NewZone(id int, zoneType string, hex hexCoords) *zone {
+	zone := &zone{}
+	zone.zoneID = id
+	zone.zoneType = zoneType
+	zone.zoneSize = 1
+	sect.zone = append(sect.zone, zone)
+	sect.zoneByHex[hex] = zone
+
+	return zone
 }
 
-func (gr *grid) setZones() {
-	totalZones := 0
+func (zone *zone) expandZone(hex hexCoords) {
+	zone.zoneSize++
+	sect.zoneByHex[hex] = zone
+}
+
+func zoneUnknown() *zone {
+	return &zone{0, "   UNCHARTED  ", 0}
+}
+
+func (sect *sector) setZones() {
 	for _, val := range gr.tileMap {
-		gr.sector.zoneByHex[val.hex] = "      unknown "
-		gr.sector.zoneByHex0[val.hex] = zoneUnknown()
+		sect.zoneByHex[val.hex] = zoneUnknown()
 	}
 
-	for _, val := range gr.tileMap {
-		if gr.sector.zoneByHex[val.hex] == "      unknown " {
-			zl := gr.sector.borderZonesList(oddQToCube(val.hex))
-			if len(zl) < 1 {
-				//step A
-			}
-			r := utils.RollDice("d20")
-			if r == 20 {
-				totalZones++
-				gr.sector.zoneByHex[val.hex] = newZone()
+}
 
-			} else {
-				gr.sector.zoneByHex[val.hex] = "Normal Space  "
-			}
-		}
-	}
+func (sctr *sector) getZone(hex hexCoords) string {
+	return sctr.zoneByHex[hex].zoneType
 }
 
 func (sctr *sector) getStar(hex hexCoords) string {
-	if sctr.zoneByHex[hex] != "" {
-		return sctr.zoneByHex[hex]
+	if sctr.starByHex[hex] != "" {
+		return sctr.starByHex[hex]
 	}
 	return "              "
 }
 
-func newZone() string {
+func randomNewZone() string {
 	r1 := utils.RollDice("d6")
 	if r1 == 6 {
-		return "Weird Energy "
+		return "Weird Energy  "
 	}
 	return newNaturalZone()
 }
@@ -89,12 +91,19 @@ func (sector *sector) borderZonesList(cube cubeCoords) []*zone {
 	var zL []*zone
 	for i := 0; i < 6; i++ {
 		neib := cubeToHex(cubeNeighbor(cube, i))
-		if sector.zoneByHex0[neib] != zoneUnknown() {
-			zL = append(zL, sector.zoneByHex0[neib])
+		if sector.zoneByHex[neib] != zoneUnknown() {
+			zL = append(zL, sector.zoneByHex[neib])
 		}
 
 	}
 	return zL
+}
+
+func (sect *sector) addStarByHex(hex hexCoords, star string) {
+	for len(star) < 14 {
+		star = star + " "
+	}
+	sect.starByHex[hex] = star
 }
 
 /*

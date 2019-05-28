@@ -31,8 +31,7 @@ func NewGrid(minX, minY, maxX, maxY int) *grid {
 			gr.tileMap[id] = tl
 		}
 	}
-	gr.sector = NewSector()
-	gr.setZones()
+
 	//gr.tileSize = len(gr.tileMap[0].lines)
 	return &gr
 }
@@ -126,12 +125,19 @@ func defineSegment(segment int, gr grid) string {
 	id := hexToID(hexCoords{gridX, gridY})
 	if val, ok := gr.tileMap[id]; ok {
 		str = val.lines[line]
-		if line == 4 || line == 3 {
-			str = "|" + gr.sector.getStar(val.hex) + "|"
+		if line == 4 {
+			str = "|" + sect.getZone(val.hex) + "|"
+
+		}
+		if line == 3 {
+			str = "|" + sect.getStar(val.hex) + "|"
 
 		}
 		// } else {
 		// 	str = "                "
+	}
+	for len(str) < 14 {
+		str = str + " "
 	}
 	if gridX == gr.maxX {
 		str = str + " \n"

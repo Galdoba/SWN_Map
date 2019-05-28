@@ -176,18 +176,28 @@ func hexNeighbor(hex hexCoords, direction int) hexCoords {
 	return setHexCoords(hex.col+dir.col, hex.row+dir.row)
 }
 
+func allNeighboursHex(hex hexCoords) []hexCoords {
+	var allN []hexCoords
+	for i := 0; i < 6; i++ {
+		allN = append(allN, hexNeighbor(hex, i))
+	}
+	return allN
+}
+
+func allNeighboursCube(cube cubeCoords) []cubeCoords {
+	var allN []cubeCoords
+	for i := 0; i < 6; i++ {
+		allN = append(allN, cubeNeighbor(cube, i))
+	}
+	return allN
+}
+
 func cubeNeighbor(cube cubeCoords, direction int) cubeCoords {
-	// hex := cubeToHex(cube)
-	// parity := hex.col & 1
-	// dir := hexDirections[parity][direction]
-	// hexN := setHexCoords(hex.col+dir.col, hex.row+dir.row)
-	// return oddQToCube(hexN)
 	cubeN := cubeCoords{cube.x + cubeDirections[direction].x, cube.y + cubeDirections[direction].y, cube.z + cubeDirections[direction].z}
 	return cubeN
 }
 
 func cubeDistance(cubeA, cubeB cubeCoords) int {
-	//return int(math.Abs(float64(cubeA.x-cubeB.x)) + math.Abs(float64(cubeA.y-cubeB.y)) + math.Abs(float64(cubeA.z-cubeB.z))/2)
 	xDif := cubeA.x - cubeB.x
 	if xDif < 0 {
 		xDif = xDif * -1
