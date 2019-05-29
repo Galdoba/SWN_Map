@@ -31,6 +31,7 @@ func main() {
 	maxX := utils.InputInt("Set Grid.maxX")
 	maxY := utils.InputInt("Set Grid.maxY")
 	initGrids()
+	initSector()
 	runStart = time.Now()
 	counter = 1
 	g, err := gocui.NewGui(gocui.OutputNormal)
@@ -61,10 +62,11 @@ func main() {
 	sect = NewSector()
 	sect.setZones()
 	sect.addStarByHex(tile2.hex, "Test Star")
-	sect.NewZone(1, "Dust Cloud    ", tile2.hex)
+	NewZone(1, "Dust Cloud    ", tile2.hex)
 	//sect.zoneByHex[tile2.hex].expandZone(tile1.hex)
 	sect.zone[0].expandZone(tile1.hex)
-	sect.NewZone(2, strconv.Itoa(sect.zoneByHex[tile2.hex].zoneSize)+" Dust Cloud  ", hexCoords{2, 3})
+	NewZone(2, strconv.Itoa(sect.zoneByHex[tile2.hex].zoneSize)+" Dust Cloud  ", hexCoords{2, 3})
+
 	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
 	//Tile("06","02")
 

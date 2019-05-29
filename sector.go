@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/Galdoba/utils"
 )
 
@@ -18,6 +20,14 @@ type zone struct {
 	zoneSize int
 }
 
+var zoneUncharted zone
+var zoneClear zone
+
+func initSector() {
+	zoneUncharted = zone{0, "   UNCHARTED  ", 0}
+	zoneClear = zone{0, "              ", 0}
+}
+
 func NewSector() *sector {
 	sect := &sector{}
 	sect.zoneByHex = make(map[hexCoords]*zone)
@@ -26,7 +36,7 @@ func NewSector() *sector {
 	return sect
 }
 
-func (sect *sector) NewZone(id int, zoneType string, hex hexCoords) *zone {
+func NewZone(id int, zoneType string, hex hexCoords) *zone {
 	zone := &zone{}
 	zone.zoneID = id
 	zone.zoneType = zoneType
@@ -43,14 +53,31 @@ func (zone *zone) expandZone(hex hexCoords) {
 }
 
 func zoneUnknown() *zone {
-	return &zone{0, "   UNCHARTED  ", 0}
+	//return &zone{0, "   UNCHARTED  ", 0}
+	return &zoneUncharted
+}
+
+func zoneClearSpace() *zone {
+	//return &zone{0, "cl            ", 0}
+	return &zoneClear
 }
 
 func (sect *sector) setZones() {
 	for _, val := range gr.tileMap {
 		sect.zoneByHex[val.hex] = zoneUnknown()
 	}
+	for _, val := range gr.tileMap {
+		bZone := borderZone(val.hex)
+		fmt.Println(bZone, val.hex)
+		if bZone == zoneClearSpace() || bZone == zoneUnknown() {
+			sect.scanA(val.hex)
+		} else {
+			fmt.Println(val.hex)
 
+			sect.scanB(val.hex, bZone)
+		}
+
+	}
 }
 
 func (sctr *sector) getZone(hex hexCoords) string {
@@ -76,7 +103,7 @@ func newNaturalZone() string {
 	r := utils.RollDice("d4")
 	switch r {
 	case 1:
-		return "Nebula"
+		return "Nebula        "
 	case 2:
 		return "Void          "
 	case 3:
@@ -87,16 +114,20 @@ func newNaturalZone() string {
 	return "Error"
 }
 
-func (sector *sector) borderZonesList(cube cubeCoords) []*zone {
-	var zL []*zone
+func borderZone(hex hexCoords) *zone {
+	cube := oddQToCube(hex)
 	for i := 0; i < 6; i++ {
 		neib := cubeToHex(cubeNeighbor(cube, i))
-		if sector.zoneByHex[neib] != zoneUnknown() {
-			zL = append(zL, sector.zoneByHex[neib])
-		}
+		if sect.zoneByHex[neib] != zoneUnknown() && sect.zoneByHex[neib] != zoneClearSpace() {
+			if sect.zoneByHex[neib] == nil {
 
+				return zoneClearSpace() //когда проверяется хекс вне пределов карты он не имеет зоны - принудительно присваиваем ему "чистый космос"
+			}
+			return sect.zoneByHex[neib]
+		}
 	}
-	return zL
+
+	return zoneClearSpace()
 }
 
 func (sect *sector) addStarByHex(hex hexCoords, star string) {
@@ -104,6 +135,72 @@ func (sect *sector) addStarByHex(hex hexCoords, star string) {
 		star = star + " "
 	}
 	sect.starByHex[hex] = star
+}
+
+func (sect *sector) scanA(hex hexCoords) {
+	r := utils.RollDice("d20")
+	sect.zoneByHex[hex] = zoneClearSpace()
+	if r == 20 {
+		sect.zoneByHex[hex] = NewZone(len(sect.zone)+1, newNaturalZone(), hex)
+	}
+}
+
+func (sect *sector) scanB(hex hexCoords, nZone *zone) {
+	adjZones := adjustedZones(hex, nZone)
+	dice := "d0"
+	tn := 0
+	switch nZone.zoneType {
+	case "Nebula        ":
+		dice = "d20"
+		tn = 20
+	case "Void          ":
+		dice = "d20"
+		tn = 20
+	case "Dust Cloud    ":
+		dice = "d12"
+		tn = 12
+	case "Plasma        ":
+		dice = "d10"
+		tn = 10
+	case "Weird Energy  ":
+		dice = "d8"
+		tn = 8
+	}
+	zRoll := utils.RollDice(dice, nZone.zoneSize-adjZones)
+	if zRoll > tn {
+
+		sect.zoneByHex[hex] = zoneClearSpace()
+	} else {
+		fmt.Println(hex, dice, zRoll, tn)
+		//panic(0)
+		nZone.expandZone(hex)
+	}
+}
+
+func adjustedZones(hex hexCoords, zone *zone) int {
+	adjZones := 0
+	cube := oddQToCube(hex)
+	for i := 0; i < 6; i++ {
+		neib := cubeToHex(cubeNeighbor(cube, i))
+		if sect.zoneByHex[neib] == zone {
+			adjZones++
+		}
+	}
+
+	return adjZones
+}
+
+func equals(zoneA, zoneB *zone) bool {
+	if zoneA.zoneID != zoneB.zoneID {
+		return false
+	}
+	if zoneA.zoneSize != zoneB.zoneSize {
+		return false
+	}
+	if zoneA.zoneType != zoneB.zoneType {
+		return false
+	}
+	return true
 }
 
 /*
