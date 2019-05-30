@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/Galdoba/utils"
 )
@@ -72,11 +73,9 @@ func (sect *sector) setZones() {
 		if bZone == zoneClearSpace() || bZone == zoneUnknown() {
 			sect.scanA(val.hex)
 		} else {
-			fmt.Println(val.hex)
-
 			sect.scanB(val.hex, bZone)
 		}
-
+		sect.scanC(val.hex)
 	}
 }
 
@@ -174,6 +173,32 @@ func (sect *sector) scanB(hex hexCoords, nZone *zone) {
 		fmt.Println(hex, dice, zRoll, tn)
 		//panic(0)
 		nZone.expandZone(hex)
+	}
+}
+
+func (sect *sector) scanC(hex hexCoords) {
+	zone := sect.zoneByHex[hex]
+	pMod := 0
+	if zone.zoneType == "Nebula        " {
+		pMod++
+	}
+	if zone.zoneType == "Void          " {
+		pMod--
+	}
+	pRoll := utils.RollDice("d6", pMod)
+	if pRoll < 4 {
+		sect.addStarByHex(hex, "              ")
+	}
+	if pRoll == 4 {
+		tRoll := utils.RollDice("d8", -4)
+		if tRoll < 1 {
+			tRoll = 0
+		}
+		star := "T-000" + strconv.Itoa(tRoll)
+		sect.addStarByHex(hex, star+"        ")
+	}
+	if pRoll > 4 {
+		sect.addStarByHex(hex, "Star          ")
 	}
 }
 

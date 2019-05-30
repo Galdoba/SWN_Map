@@ -61,11 +61,7 @@ func main() {
 	gr = NewGrid(minX, minY, maxX, maxY)
 	sect = NewSector()
 	sect.setZones()
-	sect.addStarByHex(tile2.hex, "Test Star")
-	NewZone(1, "Dust Cloud    ", tile2.hex)
 	//sect.zoneByHex[tile2.hex].expandZone(tile1.hex)
-	sect.zone[0].expandZone(tile1.hex)
-	NewZone(2, strconv.Itoa(sect.zoneByHex[tile2.hex].zoneSize)+" Dust Cloud  ", hexCoords{2, 3})
 
 	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
 	//Tile("06","02")
