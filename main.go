@@ -1,14 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/Galdoba/utils"
 
 	"github.com/jroimartin/gocui"
+)
+
+const (
+	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
 var counter int
@@ -18,18 +24,21 @@ var appErr error
 var runStart time.Time
 var gr *grid
 var sect *sector
-var mapCellX int
-var mapCellY int
-var mapCellXLast int
-var mapCellYLast int
 
 func main() {
 	seed := utils.RandomSeed()
 	fmt.Println(seed)
-	minX := utils.InputInt("Set Grid.minX")
-	minY := utils.InputInt("Set Grid.minY")
-	maxX := utils.InputInt("Set Grid.maxX")
-	maxY := utils.InputInt("Set Grid.maxY")
+	opt, _ := utils.TakeOptions("Define Sector:\n", "New Sector", "Load Sector")
+	minX := 0
+	minY := 0
+	maxX := 0
+	maxY := 0
+	if opt == 1 {
+		minX = utils.InputInt("Set Grid.minX")
+		minY = utils.InputInt("Set Grid.minY")
+		maxX = utils.InputInt("Set Grid.maxX")
+		maxY = utils.InputInt("Set Grid.maxY")
+	}
 	initGrids()
 	initSector()
 	runStart = time.Now()
@@ -61,6 +70,27 @@ func main() {
 	gr = NewGrid(minX, minY, maxX, maxY)
 	sect = NewSector()
 	sect.setZones()
+	sect.TESTThing = "sect.zoneByHex"
+	fmt.Println("MARSHAL TEST:") //нужно перехерачивать все внутренние параметры на экспорт и написать методы toString/fromString для всех типов
+	b, _ := json.MarshalIndent(&sect, "", "	")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	fmt.Println(string(b))
+	f, err := os.OpenFile("Sector.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = f.Write(b)
+	if err != nil {
+		log.Fatal(err)
+
+	}
+	f.Close()
+	os.Exit(1)
+
 	//sect.zoneByHex[tile2.hex].expandZone(tile1.hex)
 
 	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
@@ -179,5 +209,18 @@ Trade Mode
 |P    F    Pr  | - player/Factor marker
 +--------------+
  Sector: V01H01
+
+{
+	map: "Sect"
+	rows: 15
+	cols: 10
+	hex: ...hexes
+
+}
+
+
+
+
+
 
 */

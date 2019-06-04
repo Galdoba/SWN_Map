@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 
 	"github.com/Galdoba/utils"
@@ -9,10 +11,11 @@ import (
 
 //Sector - содержит о себе всю информацию о вселенной.
 type sector struct {
-	name      string
+	Name      string
 	zone      []*zone
 	zoneByHex map[hexCoords]*zone
 	starByHex map[hexCoords]string
+	TESTThing string
 }
 
 type zone struct {
@@ -27,6 +30,8 @@ var zoneClear zone
 func initSector() {
 	zoneUncharted = zone{0, "   UNCHARTED  ", 0}
 	zoneClear = zone{0, "              ", 0}
+	// If the file doesn't exist, create it, or append to the file
+
 }
 
 func NewSector() *sector {
@@ -43,6 +48,7 @@ func NewZone(id int, zoneType string, hex hexCoords) *zone {
 	zone.zoneType = zoneType
 	zone.zoneSize = 1
 	sect.zone = append(sect.zone, zone)
+
 	sect.zoneByHex[hex] = zone
 
 	return zone
@@ -71,11 +77,13 @@ func (sect *sector) setZones() {
 		bZone := borderZone(val.hex)
 		fmt.Println(bZone, val.hex)
 		if bZone == zoneClearSpace() || bZone == zoneUnknown() {
-			sect.scanA(val.hex)
+			sect.zoneByHex[val.hex] = scanA2(sect, val.hex)
+			//sect.scanA(val.hex)
 		} else {
 			sect.scanB(val.hex, bZone)
 		}
 		sect.scanC(val.hex)
+		appendToSectorFile("Added hex:"+val.hex.String()+"\n", "string2\n")
 	}
 }
 
@@ -142,6 +150,14 @@ func (sect *sector) scanA(hex hexCoords) {
 	if r == 20 {
 		sect.zoneByHex[hex] = NewZone(len(sect.zone)+1, newNaturalZone(), hex)
 	}
+}
+
+func scanA2(sect *sector, hex hexCoords) *zone {
+	r := utils.RollDice("d20")
+	if r == 20 {
+		return NewZone(len(sect.zone)+1, newNaturalZone(), hex)
+	}
+	return zoneClearSpace()
 }
 
 func (sect *sector) scanB(hex hexCoords, nZone *zone) {
@@ -226,6 +242,20 @@ func equals(zoneA, zoneB *zone) bool {
 		return false
 	}
 	return true
+}
+
+func appendToSectorFile(s ...string) {
+	f, err := os.OpenFile("Sector.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for i := range s {
+		_, err = f.Write([]byte(s[i]))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	f.Close()
 }
 
 /*

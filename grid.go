@@ -138,6 +138,10 @@ func cubeToHex(cube cubeCoords) hexCoords {
 var hexDirections [][]hexCoords
 var cubeDirections []cubeCoords
 var spiralCubeToIDMAP map[cubeCoords]int
+var mapCellX int
+var mapCellY int
+var mapCellXLast int
+var mapCellYLast int
 
 func initGrids() {
 	// hexDirections = [][]hexCoords{
@@ -168,6 +172,11 @@ func drawTile(t tile) {
 	for i := range t.lines {
 		fmt.Println(t.lines[i])
 	}
+}
+
+//String - возвращает hex в виде стринга
+func (hex hexCoords) String() string {
+	return "[" + strconv.Itoa(hex.col) + ";" + strconv.Itoa(hex.row) + "]"
 }
 
 func hexNeighbor(hex hexCoords, direction int) hexCoords {
