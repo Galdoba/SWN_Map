@@ -1,20 +1,14 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/Galdoba/utils"
 
 	"github.com/jroimartin/gocui"
-)
-
-const (
-	Header = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
 )
 
 var counter int
@@ -39,6 +33,7 @@ func main() {
 		maxX = utils.InputInt("Set Grid.maxX")
 		maxY = utils.InputInt("Set Grid.maxY")
 	}
+
 	initGrids()
 	initSector()
 	runStart = time.Now()
@@ -53,48 +48,9 @@ func main() {
 
 	bindKeys(g)
 
-	tile1 := newTileHex(1, 2)
-	tile2 := newTileHex(2, 2)
-
-	fmt.Println(spiralCubeToIDMAP[tile1.cube], "is ID for tile 1")
-	fmt.Println(spiralCubeToIDMAP[tile2.cube], "is ID for tile 2")
-
-	// fmt.Println(cubeRing(tile1.cube, 2))
-	// fmt.Println(cubeSpiral(tile1.cube, 0))
-	// for i := 0; i < 10; i++ {
-	// 	fmt.Println("Spiral with", i, "radius has", len(cubeSpiral(tile1.cube, i)), "hexes and has id =")
-	// }
-
-	//minX, minY, maxX, maxY := hexRectangleDimentions(tile1.hex, tile2.hex)
-
 	gr = NewGrid(minX, minY, maxX, maxY)
 	sect = NewSector()
-	sect.setZones()
-	sect.TESTThing = "sect.zoneByHex"
-	fmt.Println("MARSHAL TEST:") //нужно перехерачивать все внутренние параметры на экспорт и написать методы toString/fromString для всех типов
-	b, _ := json.MarshalIndent(&sect, "", "	")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-	fmt.Println(string(b))
-	f, err := os.OpenFile("Sector.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = f.Write(b)
-	if err != nil {
-		log.Fatal(err)
-
-	}
-	f.Close()
-	os.Exit(1)
-
-	//sect.zoneByHex[tile2.hex].expandZone(tile1.hex)
-
-	//gr = NewGrid(hexRectangleDimentions(newTileHex(0, 0).hex))
-	//Tile("06","02")
+	gr.setZones()
 
 	fmt.Println(drawGrid(*gr))
 

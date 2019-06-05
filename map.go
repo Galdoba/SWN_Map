@@ -5,24 +5,24 @@ import (
 )
 
 type grid struct {
-	tileMap  map[int]*tile
+	tileMap  map[int]*Tile
 	sector   *sector
 	minX     int
 	minY     int
 	maxX     int
 	maxY     int
-	tileSize int
+	TileSize int
 }
 
 func NewGrid(minX, minY, maxX, maxY int) *grid {
 	gr := grid{}
-	gr.tileMap = make(map[int]*tile)
+	gr.tileMap = make(map[int]*Tile)
 	gr.minX = minX
 	gr.minY = minY
 	gr.maxX = maxX
 	gr.maxY = maxY
 	//gr.tileMap[0] = newTileHex(minX, minY)
-	gr.tileSize = /*len(gr.tileMap[0].lines)*/ 16
+	gr.TileSize = /*len(gr.tileMap[0].lines)*/ 16
 	for y := gr.minY; y <= gr.maxY; y++ {
 		for x := gr.minX; x <= gr.maxX; x++ {
 
@@ -32,11 +32,11 @@ func NewGrid(minX, minY, maxX, maxY int) *grid {
 		}
 	}
 
-	//gr.tileSize = len(gr.tileMap[0].lines)
+	//gr.TileSize = len(gr.tileMap[0].lines)
 	return &gr
 }
 
-func getScreenCoords(t tile) hexCoords {
+func getScreenCoords(t Tile) hexCoords {
 	return t.hex
 }
 
@@ -44,7 +44,7 @@ func drawLine(s string) string {
 	return s
 }
 
-func (gr *grid) tileByXY(x, y int) *tile {
+func (gr *grid) TileByXY(x, y int) *Tile {
 	for _, val := range gr.tileMap {
 		if val.hex.col == x && val.hex.row == y {
 			return val
@@ -74,8 +74,8 @@ func drawGrid(gr grid) string {
 func totalSegments(gr grid) int {
 	totalRows := gr.maxY - gr.minY + 1
 	totalCols := gr.maxX - gr.minX + 1
-	tilelines := 8
-	totalSegments := (totalRows * totalCols * tilelines) + (totalCols * tilelines / 2)
+	Tilelines := 8
+	totalSegments := (totalRows * totalCols * Tilelines) + (totalCols * Tilelines / 2)
 	return totalSegments
 }
 
@@ -125,6 +125,10 @@ func defineSegment(segment int, gr grid) string {
 	id := hexToID(hexCoords{gridX, gridY})
 	if val, ok := gr.tileMap[id]; ok {
 		str = val.lines[line]
+		if line == 2 {
+			str = "|" + val.LayerStar + "|"
+
+		}
 		if line == 4 {
 			str = "|" + sect.getZone(val.hex) + "|"
 
@@ -161,11 +165,23 @@ func (gr *grid) tileByClick(mX, mY int) int {
 	return id
 }
 
-func NewTile(x, y int) *tile {
-	t := tile{}
+func NewTile(x, y int) *Tile {
+	t := Tile{}
 	t.hex.col = x
 	t.hex.row = y
-	t.lines = Square(x, y)
+	t.cube = oddQToCube(t.hex)
+	t.ID = hexToID(t.hex)
+	t.lines = newSquare()
+	return &t
+}
+
+func NewTileID(id int) *Tile {
+	t := Tile{}
+	t.ID = id
+	t.hex = hexFromID(id)
+	t.cube = cubeFromID(id)
+	t.lines = newSquare()
+
 	return &t
 }
 
@@ -195,7 +211,21 @@ func Square(x, y int) []string {
 	return sqr
 }
 
-func (tl *tile) square() []string {
+func newSquare() []string {
+	sqr := []string{
+		"+--------------+",
+		"|              |",
+		"|              |",
+		"|              |",
+		"|              |",
+		"|              |",
+		"|              |",
+		"+--------------+",
+	}
+	return sqr
+}
+
+func (tl *Tile) square() []string {
 	return tl.lines
 }
 

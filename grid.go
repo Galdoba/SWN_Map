@@ -17,21 +17,24 @@ const (
 )
 
 //Hex -
-type tile struct {
-	hex   hexCoords
-	cube  cubeCoords
-	id    int
-	lines []string
+type Tile struct {
+	hex       hexCoords
+	cube      cubeCoords
+	ID        int
+	LayerHex  string
+	LayerZone string
+	LayerStar string
+	lines     []string
 }
 
-func newTileHex(col, row int) *tile {
-	tile := &tile{}
-	tile.hex = setHexCoords(col, row)
-	tile.cube = oddQToCube(tile.hex)
-	tile.id = spiralCubeToIDMAP[tile.cube]
-	tile.lines = []string{
+func newTileHex(col, row int) *Tile {
+	Tile := &Tile{}
+	Tile.hex = setHexCoords(col, row)
+	Tile.cube = oddQToCube(Tile.hex)
+	Tile.ID = spiralCubeToIDMAP[Tile.cube]
+	Tile.lines = []string{
 		"+--------------+",
-		"|" + hexCoordsStr(tile.hex) + "|",
+		"|" + hexCoordsStr(Tile.hex) + "|",
 		"|              |",
 		"|              |",
 		"|              |",
@@ -41,7 +44,7 @@ func newTileHex(col, row int) *tile {
 	}
 
 	//	fmt.Println("Create:" + strconv.Itoa(col) + " " + strconv.Itoa(row))
-	return tile
+	return Tile
 }
 
 func hexCoordsStr(hex hexCoords) string {
@@ -163,12 +166,12 @@ func initGrids() {
 	spiralCubeToIDMAP = idMAP
 }
 
-func info(t tile) {
+func info(t Tile) {
 	fmt.Println("hex coords:", t.hex)
 	fmt.Println("cube coords:", t.cube)
 }
 
-func drawTile(t tile) {
+func drawTile(t Tile) {
 	for i := range t.lines {
 		fmt.Println(t.lines[i])
 	}
@@ -344,7 +347,25 @@ func coordsInRing(cube cubeCoords, ring []cubeCoords) bool {
 	return false
 }
 
-func (gr *grid) addTile(tl *tile) {
+func cubeFromID(id int) cubeCoords {
+	for k, v := range spiralCubeToIDMAP {
+		if v == id {
+			return k
+		}
+	}
+	return cubeCoords{0, 0, 0}
+}
+
+func hexFromID(id int) hexCoords {
+	for k, v := range spiralCubeToIDMAP {
+		if v == id {
+			return cubeToHex(k)
+		}
+	}
+	return hexCoords{0, 0}
+}
+
+func (gr *grid) addTile(tl *Tile) {
 	var existingTiles []hexCoords
 	for _, val := range gr.tileMap {
 		existingTiles = append(existingTiles, val.hex)
@@ -371,7 +392,7 @@ func (gr *grid) addRandomSector() {
 	again := true
 	//выбираем случайный тайл
 	for again {
-		var rTile *tile
+		var rTile *Tile
 		for _, val := range gr.tileMap {
 			rTile = val
 			break
@@ -380,7 +401,7 @@ func (gr *grid) addRandomSector() {
 
 		var neibours []cubeCoords
 		for dir := 0; dir < 6; dir++ {
-			if val, ok := gr.tileMap[rTile.id]; ok {
+			if val, ok := gr.tileMap[rTile.ID]; ok {
 				neibours = append(neibours, cubeNeighbor(val.cube, dir))
 
 			}
@@ -396,7 +417,7 @@ func (gr *grid) addRandomSector() {
 		r := utils.RollDice("d"+d, -1)
 		nTile := newTileHex(cubeToHex(neibours[r]).col, cubeToHex(neibours[r]).row)
 		for key, _ := range gr.tileMap {
-			if nTile.id != key {
+			if nTile.ID != key {
 				gr.addTile(nTile)
 				again = false
 			}

@@ -15,7 +15,8 @@ type sector struct {
 	zone      []*zone
 	zoneByHex map[hexCoords]*zone
 	starByHex map[hexCoords]string
-	TESTThing string
+	//TODO:  в принципе нет необходимости держать Sector как структуру - это все можно хранить в Тайлах и достраивать по мере необходимости
+
 }
 
 type zone struct {
@@ -69,7 +70,7 @@ func zoneClearSpace() *zone {
 	return &zoneClear
 }
 
-func (sect *sector) setZones() {
+func (gr *grid) setZones() {
 	for _, val := range gr.tileMap {
 		sect.zoneByHex[val.hex] = zoneUnknown()
 	}
@@ -77,18 +78,21 @@ func (sect *sector) setZones() {
 		bZone := borderZone(val.hex)
 		fmt.Println(bZone, val.hex)
 		if bZone == zoneClearSpace() || bZone == zoneUnknown() {
-			sect.zoneByHex[val.hex] = scanA2(sect, val.hex)
-			//sect.scanA(val.hex)
+			//sect.zoneByHex[val.hex] = scanA2()
+			sect.scanA(val.hex)
 		} else {
 			sect.scanB(val.hex, bZone)
 		}
 		sect.scanC(val.hex)
-		appendToSectorFile("Added hex:"+val.hex.String()+"\n", "string2\n")
+		//appendToSectorFile("Added hex:"+val.hex.String()+"\n", "string2\n")
 	}
 }
 
 func (sctr *sector) getZone(hex hexCoords) string {
-	return sctr.zoneByHex[hex].zoneType
+	if val, ok := sctr.zoneByHex[hex]; ok {
+		return val.zoneType //sctr.zoneByHex[hex].zoneType
+	}
+	return "              "
 }
 
 func (sctr *sector) getStar(hex hexCoords) string {
@@ -152,12 +156,12 @@ func (sect *sector) scanA(hex hexCoords) {
 	}
 }
 
-func scanA2(sect *sector, hex hexCoords) *zone {
+func scanA2() string {
 	r := utils.RollDice("d20")
 	if r == 20 {
-		return NewZone(len(sect.zone)+1, newNaturalZone(), hex)
+		return newNaturalZone()
 	}
-	return zoneClearSpace()
+	return zoneClearSpace().zoneType
 }
 
 func (sect *sector) scanB(hex hexCoords, nZone *zone) {
