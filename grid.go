@@ -16,37 +16,6 @@ const (
 	directionNW = 5
 )
 
-//Hex -
-type Tile struct {
-	hex       hexCoords
-	cube      cubeCoords
-	ID        int
-	LayerHex  string
-	LayerZone string
-	LayerStar string
-	lines     []string
-}
-
-func newTileHex(col, row int) *Tile {
-	Tile := &Tile{}
-	Tile.hex = setHexCoords(col, row)
-	Tile.cube = oddQToCube(Tile.hex)
-	Tile.ID = spiralCubeToIDMAP[Tile.cube]
-	Tile.lines = []string{
-		"+--------------+",
-		"|" + hexCoordsStr(Tile.hex) + "|",
-		"|              |",
-		"|              |",
-		"|              |",
-		"|              |",
-		"|              |",
-		"+--------------+",
-	}
-
-	//	fmt.Println("Create:" + strconv.Itoa(col) + " " + strconv.Itoa(row))
-	return Tile
-}
-
 func hexCoordsStr(hex hexCoords) string {
 	col := hex.col
 	row := hex.row
@@ -95,7 +64,6 @@ func coordNumToStr(coordName string, x int) string {
 	} else {
 		xStr += " "
 	}
-	//fmt.Println("1:", xStr)
 	if x < 10 && x > -10 {
 		xStr += "0"
 		xStr += strconv.Itoa(x)
@@ -147,10 +115,6 @@ var mapCellXLast int
 var mapCellYLast int
 
 func initGrids() {
-	// hexDirections = [][]hexCoords{
-	// 	{hexCoords{1, 0}, hexCoords{1, -1}, hexCoords{0, -1}, hexCoords{-1, -1}, hexCoords{-1, 0}, hexCoords{0, 1}},
-	// 	{hexCoords{1, 1}, hexCoords{1, 0}, hexCoords{0, -1}, hexCoords{-1, 0}, hexCoords{-1, 1}, hexCoords{0, 1}},
-	// }
 	hexDirections = [][]hexCoords{
 		{hexCoords{0, -1}, hexCoords{1, -1}, hexCoords{1, 0}, hexCoords{0, 1}, hexCoords{-1, 0}, hexCoords{-1, -1}},
 		{hexCoords{0, -1}, hexCoords{1, 0}, hexCoords{1, 1}, hexCoords{0, 1}, hexCoords{-1, 1}, hexCoords{-1, 0}},
@@ -315,7 +279,7 @@ func cubeRing(center cubeCoords, radius int) (ring []cubeCoords) {
 	for !done {
 		for i := 0; i < 6; i++ {
 			ringAplicant := cubeNeighbor(ring[len(ring)-1], i)
-			if ringAplicant == start {
+			if ringAplicant == start { //если новый сосед равен старту - возвращаем ring
 				return ring
 			}
 			if cubeDistance(center, ringAplicant) == radius {
@@ -326,7 +290,6 @@ func cubeRing(center cubeCoords, radius int) (ring []cubeCoords) {
 			}
 		}
 	}
-	//если новый сосед равен старту - возвращаем ring
 	return ring
 }
 
@@ -374,20 +337,9 @@ func (gr *grid) addTile(tl *Tile) {
 	id := hexToID(tl.hex)
 	gr.tileMap[id] = tl
 	gr.minX, gr.minY, gr.maxX, gr.maxY = hexRectangleDimentions(existingTiles...)
-	// for y := gr.minY; y <= gr.maxY; y++ {
-	// 	for x := gr.minX; x <= gr.maxX; x++ {
-	// 		id := hexToID(hexCoords{x, y})
-	// 		if _, ok := gr.tileMap[id]; !ok {
-	// 			tl := newTileHex(x, y)
-	// 			id := hexToID(tl.hex)
-	// 			gr.tileMap[id] = tl
-
-	// 		}
-	// 	}
-	// }
-
 }
 
+//возможно не нужно
 func (gr *grid) addRandomSector() {
 	again := true
 	//выбираем случайный тайл
@@ -416,7 +368,7 @@ func (gr *grid) addRandomSector() {
 		d := strconv.Itoa(len(neibours))
 		r := utils.RollDice("d"+d, -1)
 		nTile := newTileHex(cubeToHex(neibours[r]).col, cubeToHex(neibours[r]).row)
-		for key, _ := range gr.tileMap {
+		for key := range gr.tileMap {
 			if nTile.ID != key {
 				gr.addTile(nTile)
 				again = false
@@ -424,4 +376,28 @@ func (gr *grid) addRandomSector() {
 		}
 	}
 	//panic(1)
+}
+
+func layerInfoL(str string) string {
+	for len(str) < 14 {
+		str = str + " "
+	}
+	return str
+}
+
+func layerInfoR(str string) string {
+	for len(str) < 14 {
+		str = " " + str
+	}
+	return str
+}
+
+func (tile *Tile) toString() string {
+	str := ""
+	str += "ID: " + strconv.Itoa(tile.ID) + "\n"
+	str += "HEX: " + strconv.Itoa(tile.hex.col) + " " + strconv.Itoa(tile.hex.row) + "\n"
+	str += "CUBE: " + strconv.Itoa(tile.cube.x) + " " + strconv.Itoa(tile.cube.y) + " " + strconv.Itoa(tile.cube.z) + " " + "\n"
+	str += "Zone: " + tile.LayerZone + "\n"
+	str += "Star: " + tile.LayerStar + "\n"
+	return str
 }

@@ -2,11 +2,12 @@ package main
 
 import (
 	"strconv"
+
+	"github.com/Galdoba/utils"
 )
 
 type grid struct {
 	tileMap  map[int]*Tile
-	sector   *sector
 	minX     int
 	minY     int
 	maxX     int
@@ -14,6 +15,7 @@ type grid struct {
 	TileSize int
 }
 
+//NewGrid - создает сеть
 func NewGrid(minX, minY, maxX, maxY int) *grid {
 	gr := grid{}
 	gr.tileMap = make(map[int]*Tile)
@@ -104,6 +106,7 @@ func defineSegment(segment int, gr grid) string {
 	line := segment / totalCols % 8
 	gridX := gr.minX + col
 	str := "                "
+	color := "white"
 	// if absInt(gridX)%2 > 0 {
 	// 	offset = true
 	// }
@@ -124,29 +127,62 @@ func defineSegment(segment int, gr grid) string {
 	gridY := gr.minY + row /*/8*/
 	id := hexToID(hexCoords{gridX, gridY})
 	if val, ok := gr.tileMap[id]; ok {
+		color = zoneColor(val.LayerZone)
 		str = val.lines[line]
-		if line == 2 {
-			str = "|" + val.LayerStar + "|"
+		// if line == 2 {
+		// 	str = "|" + layerInfoL(val.LayerZone) + "|"
 
+		// }
+		if line == 1 {
+			str = "|" + utils.AsciiColor("white", hexCoordsStr(val.hex)) + utils.AsciiColor(color, "|")
+
+		}
+
+		if line == 3 {
+			str = "|              |"
+			if val.LayerStar != "" {
+				str = "|      " + utils.AsciiColor("white", "\x23\x23") + utils.AsciiColor(color, "      |")
+			}
 		}
 		if line == 4 {
-			str = "|" + sect.getZone(val.hex) + "|"
-
+			str = "|              |"
+			if val.LayerStar != "" {
+				str = "|      " + utils.AsciiColor("white", "\x23\x23") + utils.AsciiColor(color, "      |")
+			}
 		}
-		if line == 3 {
-			str = "|" + sect.getStar(val.hex) + "|"
 
-		}
+		// if line == 4 {
+		// 	str = "|" + layerInfoL(val.LayerStar) + "|"
+
+		// }
+
 		// } else {
 		// 	str = "                "
 	}
 	for len(str) < 14 {
 		str = str + " "
 	}
+	str = utils.AsciiColor(color, str)
 	if gridX == gr.maxX {
 		str = str + " \n"
 	}
 	return str
+}
+
+func zoneColor(zoneLayer string) string {
+	switch zoneLayer {
+	case "Weird Energy":
+		return "green"
+	case "Nebula":
+		return "cyan"
+	case "Void":
+		return "blue"
+	case "Dust Cloud":
+		return "yellow"
+	case "Plasma":
+		return "magenta"
+	}
+	return "white"
 }
 
 func (gr *grid) tileByClick(mX, mY int) int {
@@ -165,35 +201,64 @@ func (gr *grid) tileByClick(mX, mY int) int {
 	return id
 }
 
-func NewTile(x, y int) *Tile {
-	t := Tile{}
-	t.hex.col = x
-	t.hex.row = y
-	t.cube = oddQToCube(t.hex)
-	t.ID = hexToID(t.hex)
-	t.lines = newSquare()
-	return &t
-}
-
-func NewTileID(id int) *Tile {
-	t := Tile{}
-	t.ID = id
-	t.hex = hexFromID(id)
-	t.cube = cubeFromID(id)
-	t.lines = newSquare()
-
-	return &t
-}
-
-// func idForGrid(g grid, x, y int) int {
-// 	return (g.maxX * y) + x
+// func NewTile(x, y int) *Tile {
+// 	t := Tile{}
+// 	t.hex.col = x
+// 	t.hex.row = y
+// 	t.cube = oddQToCube(t.hex)
+// 	t.ID = hexToID(t.hex)
+// 	t.lines = newSquare()
+// 	return &t
 // }
+
+// func NewTileByID(id int) *Tile {
+// 	t := Tile{}
+// 	t.ID = id
+// 	t.hex = hexFromID(id)
+// 	t.cube = cubeFromID(id)
+// 	t.lines = newSquare()
+
+// 	return &t
+// }
+
+//Tile -
+type Tile struct {
+	hex       hexCoords
+	cube      cubeCoords
+	ID        int
+	LayerHex  string
+	LayerZone string
+	LayerStar string
+	lines     []string
+}
+
+func newTileHex(col, row int) *Tile {
+	tile := &Tile{}
+	tile.hex = setHexCoords(col, row)
+	tile.cube = oddQToCube(tile.hex)
+	tile.ID = spiralCubeToIDMAP[tile.cube]
+	tile.LayerStar = "NO DATA"
+	tile.LayerZone = "NO DATA"
+	tile.lines = []string{
+		"+--------------+",
+		"|" + hexCoordsStr(tile.hex) + "|",
+		"|              |",
+		"|              |",
+		"|              |",
+		"|              |",
+		"|              |",
+		"+--------------+",
+	}
+	//	fmt.Println("Create:" + strconv.Itoa(col) + " " + strconv.Itoa(row))
+	return tile
+}
 
 func hexToID(hex hexCoords) int {
 	cube := oddQToCube(hex)
 	return spiralCubeToIDMAP[cube]
 }
 
+//Square -
 func Square(x, y int) []string {
 	xCoord := convertCoord(x)
 	yCoord := convertCoord(y)

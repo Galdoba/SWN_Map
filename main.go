@@ -17,7 +17,6 @@ var tickerGo bool
 var appErr error
 var runStart time.Time
 var gr *grid
-var sect *sector
 
 func main() {
 	seed := utils.RandomSeed()
@@ -35,7 +34,6 @@ func main() {
 	}
 
 	initGrids()
-	initSector()
 	runStart = time.Now()
 	counter = 1
 	g, err := gocui.NewGui(gocui.OutputNormal)
@@ -49,12 +47,14 @@ func main() {
 	bindKeys(g)
 
 	gr = NewGrid(minX, minY, maxX, maxY)
-	sect = NewSector()
-	gr.setZones()
 
 	fmt.Println(drawGrid(*gr))
-
-	//os.Exit(1)
+	gr.scanSector()
+	// for _, v := range gr.tileMap {
+	// 	if v.isZone() {
+	// 		v.zoneSize()
+	// 	}
+	// }
 
 	go func() {
 		for {
@@ -124,9 +124,12 @@ func fillPanel(v *gocui.View) {
 		fmt.Fprintf(v, "\n"+strconv.Itoa(mapCellXLast)+" mXl"+"   "+strconv.Itoa(mapCellYLast)+" mYl")
 		fmt.Fprintf(v, "\nTile Clicked: \n")
 		hexID := gr.tileByClick(mapCellX, mapCellY)
+		lastHexID := gr.tileByClick(mapCellXLast, mapCellYLast)
 		var lines []string
+		var data string
 		if val, ok := gr.tileMap[hexID]; ok {
 			lines = val.lines
+			data = val.toString()
 		} else {
 			lines = append(lines, " ")
 		}
@@ -134,7 +137,14 @@ func fillPanel(v *gocui.View) {
 		for i := range lines {
 			fmt.Fprintf(v, lines[i]+"\n")
 		}
-
+		fmt.Fprintf(v, data)
+		if hexID != lastHexID {
+			return
+		}
+		if val, ok := gr.tileMap[lastHexID]; ok {
+			data2 := val.toString()
+			fmt.Fprintf(v, data2)
+		}
 	case "Info":
 		v.Clear()
 
