@@ -66,6 +66,7 @@ func actionIncreaseCounter(g *gocui.Gui, v *gocui.View) error {
 
 func actionToggleTicker(g *gocui.Gui, v *gocui.View) error {
 	toggleTicker()
+	g.Update(layout)
 	return nil
 }
 
@@ -118,8 +119,8 @@ func executeClick(v *gocui.View) error {
 		clX, clY := v.Cursor()
 		mapCellX = oX + clX
 		mapCellY = oY + clY
-		toggleTicker()
-		fillPanel(v)
+		//toggleTicker()
+		//fillPanel(v)
 
 	default:
 

@@ -48,7 +48,7 @@ func main() {
 
 	gr = NewGrid(minX, minY, maxX, maxY)
 
-	fmt.Println(drawGrid(*gr))
+	//fmt.Println(drawGrid(*gr))
 	gr.scanSector()
 	// for _, v := range gr.tileMap {
 	// 	if v.isZone() {
@@ -56,21 +56,24 @@ func main() {
 	// 	}
 	// }
 
-	go func() {
-		for {
-			time.Sleep(500 * time.Millisecond)
-			g.Update(layout)
+	// go func() {
+	// 	for {
+	// 		time.Sleep(500 * time.Millisecond)
+	// 		g.Update(layout)
 
-			if tickerGo {
-				ticker = ticker + counter
-			}
+	// 		if tickerGo {
+	// 			ticker = ticker + counter
+	// 		}
 
-		}
-	}()
+	// 	}
+	// }()
 
-	if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
-		log.Panicln(err)
-	}
+	// if err := g.MainLoop(); err != nil && err != gocui.ErrQuit {
+	// 	log.Panicln(err)
+	// 	g.Update(layout)
+	// }
+
+	fmt.Println(drawGrid(*gr))
 }
 
 //Создает и отрисовывает все окна - к этому моменту программа должна иметь
@@ -116,7 +119,7 @@ func fillPanel(v *gocui.View) {
 		fmt.Fprintf(v, "Current Real Time: %s \n", t)
 		fmt.Fprintf(v, "RunStart: %s\n", ts)
 		s := time.Since(runStart).Round(time.Millisecond)
-		pureSeconds := float64(time.Millisecond) + 567
+		pureSeconds := float64(time.Millisecond) + 1000
 		fmt.Fprintf(v, "Program working: %s\n Sec: %d\n", s, pureSeconds/1000)
 		fmt.Fprintf(v, "%d, %d\n", ticker, counter)
 		fmt.Fprintf(v, "rume 'm' = %d", string(rune(109)))
@@ -165,6 +168,10 @@ Navigation Mode
 |player is here| - player marker
 +--------------+
 
++------+
+|  **  |
+|  **  |
++------+
 Trade Mode
 +--------------+
 |Sector: V01H01| - coordinates

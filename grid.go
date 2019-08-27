@@ -397,7 +397,6 @@ func (tile *Tile) toString() string {
 	str += "ID: " + strconv.Itoa(tile.ID) + "\n"
 	str += "HEX: " + strconv.Itoa(tile.hex.col) + " " + strconv.Itoa(tile.hex.row) + "\n"
 	str += "CUBE: " + strconv.Itoa(tile.cube.x) + " " + strconv.Itoa(tile.cube.y) + " " + strconv.Itoa(tile.cube.z) + " " + "\n"
-	str += "Zone: " + tile.LayerZone + "\n"
 	str += "Star: " + tile.LayerStar + "\n"
 	return str
 }

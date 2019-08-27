@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/Galdoba/utils"
@@ -29,29 +27,6 @@ import (
 // 		//appendToSectorFile("Added hex:"+val.hex.String()+"\n", "string2\n")
 // 	}
 // }
-
-func randomNewZone() string {
-	r1 := utils.RollDice("d6")
-	if r1 == 6 {
-		return "Weird Energy"
-	}
-	return newNaturalZone()
-}
-
-func newNaturalZone() string {
-	r := utils.RollDice("d4")
-	switch r {
-	case 1:
-		return "Nebula"
-	case 2:
-		return "Void"
-	case 3:
-		return "Dust Cloud"
-	case 4:
-		return "Plasma"
-	}
-	return "Error"
-}
 
 // func scanA2() string {
 // 	r := utils.RollDice("d20")
@@ -136,17 +111,9 @@ func appendToSectorFile(s ...string) {
 func (gr *grid) scanSector() {
 	for _, v := range gr.tileMap {
 		time.Sleep(1)
-		if !borderZonesExists(v) {
-			v.LayerZone = scanA()
-		} else {
-			//v.LayerZone = "Check Expand"
-			//gr.tileMap[k] = v
-			//zone := adjustedZone(v)
-			//size := v.zoneSize()
-			v.LayerZone = scanB(adjustedZone(v))
+		if utils.RandomBool() {
+			v.LayerStar = "scanC(v)	"
 		}
-		v.LayerStar = scanC(v)
-
 	}
 }
 
@@ -159,100 +126,6 @@ func neighborTiles(tile *Tile) []*Tile {
 		}
 	}
 	return neighbors
-}
-
-func borderZonesExists(tile *Tile) bool {
-	nTile := neighborTiles(tile)
-	for i := range nTile {
-		if nTile[i].isZone() {
-			return true
-		}
-	}
-	return false
-}
-
-func scanA() string {
-	r := utils.RollDice("d20")
-	if r != 20 {
-		return ""
-	}
-	return newNaturalZone()
-}
-
-func scanB(zone string) string {
-	r := utils.RollDice("d6")
-	if r > 3 {
-		return ""
-	}
-	return zone
-}
-
-func scanC(tile *Tile) string {
-	pMod := 0
-	if tile.LayerZone == "Nebula" {
-		pMod++
-	}
-	if tile.LayerZone == "Void" {
-		pMod--
-	}
-	pRoll := utils.RollDice("d6", pMod)
-	if pRoll < 4 {
-		return ""
-	}
-	if pRoll == 4 {
-		tRoll := utils.RollDice("d8", -4)
-		if tRoll < 1 {
-			tRoll = 0
-		}
-		return "T-000" + strconv.Itoa(tRoll)
-
-	}
-	if pRoll > 4 {
-		syst := NewStarSystem(utils.RollDice("d100"))
-		return syst.getStarClasses() + "-" + syst.getStarCode()
-	}
-	return ""
-}
-
-func (tile *Tile) isZone() bool {
-	if tile.LayerZone != "NO DATA" && tile.LayerZone != "" {
-		return true
-	}
-	return false
-}
-
-func adjustedZone(tile *Tile) string {
-	nTiles := neighborTiles(tile)
-	var zones []string
-	for i := range nTiles {
-		if !nTiles[i].isZone() {
-			continue
-		}
-		zones = appendIfNew(zones, nTiles[i].LayerZone)
-	}
-	return utils.RandomFromList(zones)
-}
-
-func (tile *Tile) zoneSize() int {
-	if !tile.isZone() {
-		return 0
-	}
-	var ids []string
-	ids = appendIfNew(ids, strconv.Itoa(tile.ID))
-	size := 1
-
-	for i := range ids {
-		id, _ := strconv.Atoi(ids[i])
-		nTiles := neighborTiles(gr.tileMap[id])
-		for j := range nTiles {
-			if nTiles[j].LayerZone == tile.LayerZone {
-				size++
-				ids = appendIfNew(ids, strconv.Itoa(tile.ID))
-			}
-		}
-	}
-	fmt.Println(tile.hex, tile.LayerZone, size)
-	return size
 }
 
 func appendIfNew(slice []string, elem string) []string {
